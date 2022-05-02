@@ -1,4 +1,4 @@
- -- create a custom table        
+ -- create a custom table now       
   create table mydb.mytable persistent
   (
   col1 incr primary key,
