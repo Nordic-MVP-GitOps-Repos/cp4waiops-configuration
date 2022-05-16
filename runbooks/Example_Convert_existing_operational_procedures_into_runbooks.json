@@ -1,0 +1,153 @@
+{
+  "name": "Example: Convert existing operational procedures into runbooks",
+  "description": "This runbook explains how to convert your existing operational procedures into runbooks. It covers file based procedures and web/wiki based procedures.",
+  "steps": [
+    {
+      "title": "Before you start",
+      "description": "Exported into step001.html",
+      "number": 1,
+      "type": "manual"
+    },
+    {
+      "title": "Install the tool: Prepare to copy each of the code blocks from the subsequent steps into their own files",
+      "description": "Exported into step002.html",
+      "number": 2,
+      "type": "manual"
+    },
+    {
+      "title": "File: config.js",
+      "description": "Exported into step003.html",
+      "number": 3,
+      "type": "manual"
+    },
+    {
+      "title": "File: crawler.js",
+      "description": "Exported into step004.html",
+      "number": 4,
+      "type": "manual"
+    },
+    {
+      "title": "File: index.js",
+      "description": "Exported into step005.html",
+      "number": 5,
+      "type": "manual"
+    },
+    {
+      "title": "File: Link.js",
+      "description": "Exported into step006.html",
+      "number": 6,
+      "type": "manual"
+    },
+    {
+      "title": "File: package.json",
+      "description": "Exported into step007.html",
+      "number": 7,
+      "type": "manual"
+    },
+    {
+      "title": "File: parser.js",
+      "description": "Exported into step008.html",
+      "number": 8,
+      "type": "manual"
+    },
+    {
+      "title": "File: Runbook.js",
+      "description": "Exported into step009.html",
+      "number": 9,
+      "type": "manual"
+    },
+    {
+      "title": "File: utils.js",
+      "description": "Exported into step010.html",
+      "number": 10,
+      "type": "manual"
+    },
+    {
+      "title": "Install the prerequisites",
+      "description": "Exported into step011.html",
+      "number": 11,
+      "type": "manual"
+    },
+    {
+      "title": "Run the tool to convert some pages from IBM Documentation into runbooks",
+      "description": "Exported into step012.html",
+      "number": 12,
+      "type": "manual"
+    },
+    {
+      "title": "Set the value of CURL_BASEURL to specify the deployment where you want to import the runbooks to",
+      "number": 13,
+      "type": "manual",
+      "description": "Exported into step013.html"
+    },
+    {
+      "title": "Generate API key and set the value of CURL_AUTHENTICATION",
+      "number": 14,
+      "type": "manual",
+      "description": "Exported into step014.html"
+    },
+    {
+      "title": "Test the connectivity to the target RBA API endpoint (optional)",
+      "description": "Exported into step015.html",
+      "number": 15,
+      "type": "manual"
+    },
+    {
+      "title": "Import the converted runbooks to your deployment",
+      "description": "Exported into step016.html",
+      "number": 16,
+      "type": "manual"
+    },
+    {
+      "title": "Inspect the imported runbooks",
+      "description": "Exported into step017.html",
+      "number": 17,
+      "type": "manual"
+    },
+    {
+      "title": "Adjust the tool to convert and import your own runbooks: Before you start",
+      "description": "Exported into step018.html",
+      "number": 18,
+      "type": "manual"
+    },
+    {
+      "title": "Get familiar with the configuration options, and run the tool to convert your own runbooks",
+      "description": "Exported into step019.html",
+      "number": 19,
+      "type": "manual"
+    },
+    {
+      "title": "Only if needed: Split large result files and import them individually",
+      "description": "Exported into step020.html",
+      "number": 20,
+      "type": "manual"
+    },
+    {
+      "title": "Delete API key",
+      "number": 21,
+      "type": "manual",
+      "description": "Exported into step021.html"
+    }
+  ],
+  "parameters": [
+    {
+      "name": "CURL_BASEURL",
+      "description": "See step 13 for instructions how to create the value for this parameter. You can start with an empty value but you have to supply a value before proceeding to step 14.",
+      "type": "string",
+      "minLength": 0
+    },
+    {
+      "name": "CURL_AUTHENTICATION",
+      "description": "See step 14 for instructions how to create the value for this parameter. You can start with an empty value but you have to supply a value before proceeding to step 15.",
+      "type": "string",
+      "minLength": 0,
+      "format": "password"
+    }
+  ],
+  "tags": [
+    "rbaimport",
+    "sample"
+  ],
+  "_runbookId": "18df5174-be92-4c41-af63-f7b1538e2ae4",
+  "automations": {}
+}

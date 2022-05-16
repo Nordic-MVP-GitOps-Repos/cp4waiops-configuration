@@ -1,0 +1,14 @@
+<h3>Regular connectivity test</h3>
+<p>To verify the correctness of the values of the TARGET_BASEURL and TARGET_AUTHENTICATION parameters, run the command</p>
+<section class="rba-command"><span class="rba-command-text">curl -X GET -k&nbsp;<span class="rba-parameter" data-id="TARGET_AUTHENTICATION"></span> "<span class="rba-parameter" data-id="TARGET_BASEURL"></span>/status"</span></section>
+<p>This command is expected to print some informational data about the speed of the transfer along with some JSON result data similar to this:</p><pre><code class="language-plaintext">{"rbs":0,"as":0,"db":0,"connection":{"AWX":0,"BIGFIX":2,"IMPACT":2,"SCRIPT":0},"errors":[]}</code></pre>
+<p>Note that some of the connection items may have a different value than "0", and the "errors" array within the JSON result data might be nonempty if some connection is in a failed state.</p>
+<ul>
+  <li>If some of the runbooks that you are about to export and import references a script automation, then the "SCRIPT" (SSH) connection must have value "0".</li>
+  <li>If some of the runbooks that you are about to export and import references an Ansible Tower automation, then the "AWX" connection must have value "0", and the same Ansible Tower installation must be configured for both the source and the target deployment.</li>
+</ul>
+<p>&nbsp;</p>
+<h3>Connectivity test with more debug data (use only if needed)</h3>
+<p>If no data or different data are printed (e.g., some HTML content), then verify if the parameter values have been specified correctly. If the messages provided by the command are not sufficient, you can also add the "-v" option to debug the command:</p>
+<section class="rba-command"><span class="rba-command-text">curl -X GET -v -k&nbsp;<span class="rba-parameter" data-id="TARGET_AUTHENTICATION"></span> "<span class="rba-parameter" data-id="TARGET_BASEURL"></span>/status"</span></section>
+<p>&nbsp;Adjust the parameter values as needed, until the command works as expected.</p>

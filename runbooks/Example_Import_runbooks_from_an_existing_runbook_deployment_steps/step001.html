@@ -1,0 +1,18 @@
+<p>This runbook provides instructions to export runbooks from one deployment and to import them to another deployment. It uses the RBA API for both operations.</p>
+<ul>
+  <li>If you import runbooks more than once, they are duplicated and not replaced.</li>
+  <li>If your runbook refers to a script automation, then the SSH connection must be configured on the target deployment prior to importing the runbook.</li>
+  <li>If several runbooks refer to the same script automation, and these runbooks are exported and imported separately, the automation will be duplicated during import.</li>
+  <li>Exporting multiple runbooks at once will consolidate automations referenced by more than one runbook and only create the minimum number of new automations.</li>
+  <li>The described procedures will not migrate other configuration, such as the following (some of the following configuration features may not be supported by the type of deployment you are using):<ul>
+      <li>BigFix automations (because fixlets are stored in BigFix)</li>
+      <li>Ansible automations (because job templates and workflow job templates are stored in Ansible Tower)</li>
+      <li>Triggers (because triggers are stored in Impact)</li>
+      <li>Gateway setup</li>
+      <li>Connections to automation providers</li>
+      <li>Connection to Impact</li>
+      <li>Users and user role mappings</li>
+    </ul>
+  </li>
+  <li>The sample "curl" commands in this runbook use the "-k" option to suppress certificate validation. You can adjust this as needed and save a new version of this runbook.</li>
+</ul>

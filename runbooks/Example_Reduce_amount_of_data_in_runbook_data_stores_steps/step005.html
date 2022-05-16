@@ -1,0 +1,11 @@
+<p>The API endpoint "GET /.../runbookinstances" allows you to extract the execution data in various ways. Before getting the data, you should determine the timeframe of the data to be extracted. You need a start date and an end date. If you leave the START_DATE parameter empty then the start date defaults to "7 days ago". If you leave the END_DATE parameter empty then the end date defaults to "today". All data formats which can be parsed by <a target="_blank" rel="noopener noreferrer" href="https://momentjs.com/">moment.js</a> are supported. The current start date is <span class="rba-parameter" data-id="START_DATE"></span>. The current end date is <span class="rba-parameter" data-id="END_DATE"></span>.</p>
+<p>Gather the list of runbook instance IDs by running the following command and store the output:</p>
+<p>&nbsp;</p>
+<section class="rba-command"><span class="rba-command-text">curl -X GET -k&nbsp;<span class="rba-parameter" data-id="CURL_AUTHENTICATION"></span> "<span class="rba-parameter" data-id="CURL_BASEURL"></span>/runbookinstances?from=<span class="rba-parameter" data-id="START_DATE"></span>&amp;to=<span class="rba-parameter" data-id="END_DATE"></span>&amp;fields=_id"</span></section>
+<p>&nbsp;</p>
+<p><br>&nbsp;</p>
+<p>The output is structured like this: [ { "_id" : $runbookInstanceId1 }, { "_id" : $runbookInstanceId3 }, …, { "_id" : $runbookInstanceIdN } ]</p>
+<p>For every runbookInstanceId present in this output, run the following commands. Replace the term "RID" with your runbookInstanceId:</p>
+<p>&nbsp;</p>
+<section class="rba-command"><span class="rba-command-text">runbookInstanceId=RID;curl -X GET -k&nbsp;<span class="rba-parameter" data-id="CURL_AUTHENTICATION"></span> "<span class="rba-parameter" data-id="CURL_BASEURL"></span>/runbookinstances/${runbookInstanceId}?data=full" &gt; $runbookInstanceId.json</span></section>
+<p>&nbsp;</p>

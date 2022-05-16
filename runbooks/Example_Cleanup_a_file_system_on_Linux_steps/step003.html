@@ -1,0 +1,16 @@
+<p>Login to <span class="rba-parameter" data-id="HOSTNAME"></span>and run the following commands:</p>
+<p>&nbsp;</p>
+<section class="rba-command"><span class="rba-command-text">export FILESYSTEM=<span class="rba-parameter" data-id="FILESYSTEM"></span></span></section>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<section class="rba-command"><span class="rba-command-text">find $FILESYSTEM -depth -type f -name "*.tmp" -delete</span></section>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<section class="rba-command"><span class="rba-command-text">find $FILESYSTEM -depth -type f -name "*.dmp" -delete</span></section>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<section class="rba-command"><span class="rba-command-text">find $FILESYSTEM -depth -type f -name "*.log" -mtime +30 -delete</span></section>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<section class="rba-command"><span class="rba-command-text">find $FILESYSTEM/.TRASH* -depth -type f -delete</span></section>
+<p>&nbsp;</p>

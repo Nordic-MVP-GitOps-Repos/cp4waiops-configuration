@@ -1,0 +1,11 @@
+<p>To verify the correctness of the values of the TARGET_RBAHOST and TARGET_APIKEY parameters, run the command</p>
+<section class="rba-command"><span class="rba-command-text">curl -X GET -k -u "<span class="rba-parameter" data-id="TARGET_APIKEY"></span>" "https://<span class="rba-parameter" data-id="TARGET_RBAHOST"></span>/api/v1/rba/status"</span></section>
+<p>This command is expected to print some informational data about the speed of the transfer along with some JSON result data similar to this:</p>
+<blockquote>
+  <p>{"rbs":0,"as":0,"db":0,"connection":{"AWX":0,"BIGFIX":0,"IMPACT":0,"SCRIPT":0},"errors":[]}</p>
+</blockquote>
+<p>Typically it is no problem for the purpose of running this runbook if the "errors" array is non-empty. However, the value for "IMPACT" must be 0 for storing the triggers in the target deployment. In addition, if the runbooks from the source deployment contain automations, then the respective type of automation (e.g., "SCRIPT") must also have the value 0. Otherwise these runbooks cannot be stored in the target deployment.</p>
+<p>If no data or different data are printed (e.g., some HTML content), then verify if the parameter values have been specified correctly. If the messages provided by the command are not sufficient, you can also add the "-v" option to debug the command:</p>
+<section class="rba-command"><span class="rba-command-text">curl -X GET -v -k -u "<span class="rba-parameter" data-id="TARGET_APIKEY"></span>" "https://<span class="rba-parameter" data-id="TARGET_RBAHOST"></span>/api/v1/rba/status"</span></section>
+<p>&nbsp;Adjust the parameter values as needed, until the command works as expected.</p>
+<p>&nbsp;</p>

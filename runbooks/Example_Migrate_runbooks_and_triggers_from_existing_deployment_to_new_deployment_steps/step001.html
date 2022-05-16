@@ -1,0 +1,24 @@
+<p>This runbook provides instructions to export runbooks and triggers from one deployment with runbooks (RBA) and IBM Tivoli Netcool/Impact (Impact), and to import them to another RBA/Impact deployment (for example, within IBM Netcool Operations Insight (NOI) running on Red Hat OpenShift Container Platform (OCP)). It uses the RBA API.</p>
+<ul>
+  <li>This runbook uses the "keepId" option to export runbooks including their runbook ID, which is required to maintain the consistency between runbooks and triggers. This feature has been introduced in the June 2021 release of RBA. Ensure that the source RBA deployment is at the level of the June 2021 release (e.g., NOI 1.6.3.2 or RBA Private Deployment 1.23) or higher.</li>
+  <li>Creating triggers from exported trigger data requires the target RBA deployment to be at the level of the September 2021 release (e.g., NOI 1.6.3.3 or RBA Private Deployment 1.24) or higher.</li>
+  <li>This runbook contains a Node.js tool for transforming triggers from output format to input format. You need to have at least version 14.15.4 of the Node.js runtime installed to run the tool.</li>
+  <li>Check if any of the triggers in the source deployment are marked as broken because the referenced runbook does no longer exist, and repair or delete them. Broken triggers can be exported but not created again. If you try to create a trigger that references a runbook that does not exist, you get an error message like this: "ARBR501E The referenced runbook with ID xxx-yyy-zzz does not exist."</li>
+  <li>If the target RBA deployment supports the runbook approval feature, and if the approval feature is enabled, you should consider to disable approvals temporarily before you import the runbooks. The import command below uses the option "publish=true" to automatically publish the imported runbooks. If you want the imported runbooks to be saved as drafts only, you need to modify the import command and remove the "publish=true" option before you run it.</li>
+  <li>This runbook exports all runbooks at once. Exporting all runbooks at once will consolidate automations referenced by more than one runbook and only create the minimum number of new automations in the target deployment.</li>
+  <li>This runbook will not migrate other configuration. Make sure to configure the capabilities that you need in your target deployment before you migrate the data. These capabilities may include:<ul>
+      <li>BigFix automations (because fixlets are stored in BigFix)</li>
+      <li>Ansible automations (because job templates and workflow job templates are stored in Ansible Tower)</li>
+      <li>Gateway setup</li>
+      <li>Connections to automation providers</li>
+      <li>Connection to Impact</li>
+      <li>Users and user role mappings</li>
+    </ul>
+  </li>
+  <li>The sample "curl" commands in this runbook use the "-k" option to suppress certificate validation. You can adjust this as needed and save a new version of this runbook.</li>
+  <li>See the following articles for more information on exporting and importing runbooks:<ul>
+      <li>Migrating data from RBA Cloud to RBA Private Deployment and vice versa: <a target="_blank" rel="noopener noreferrer" href="https://www.ibm.com/docs/en/runbook-automation?topic=utdt-migrating-data-from-rba-cloud-rba-private-deployment-vice-versa">https://www.ibm.com/docs/en/runbook-automation?topic=utdt-migrating-data-from-rba-cloud-rba-private-deployment-vice-versa</a></li>
+      <li>Export and import runbooks, including converting a large JSON file to chunks: <a target="_blank" rel="noopener noreferrer" href="https://www.ibm.com/docs/en/runbook-automation?topic=tasks-export-import-runbooks">https://www.ibm.com/docs/en/runbook-automation?topic=tasks-export-import-runbooks</a></li>
+    </ul>
+  </li>
+</ul>

@@ -1,0 +1,7 @@
+<p>Open a shell from where you have network access to the target runbook deployment, and where you have the curl command available. Ensure that you have the file exportedRunbooks.json (or the chunks from the previous step) accessible as well from that shell.</p>
+<p>Run the command</p>
+<section class="rba-command"><span class="rba-command-text">curl -X POST -k -s -H "Expect:" -H "Content-Type: application/json"&nbsp;<span class="rba-parameter" data-id="TARGET_AUTHENTICATION"></span> -d@./exportedRunbooks.json "<span class="rba-parameter" data-id="TARGET_BASEURL"></span>/runbooks/import"</span></section>
+<ul>
+  <li>once for the single file exportedRunbooks.json (in case its size is below 1 MB)</li>
+  <li>or multiple times, once for each of the chunks exportedRunbooks.json.* that you have created in the previous step.</li>
+</ul>

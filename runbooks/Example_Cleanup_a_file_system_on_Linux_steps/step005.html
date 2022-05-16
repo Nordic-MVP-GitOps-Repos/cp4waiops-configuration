@@ -1,0 +1,7 @@
+<p>Run the following command:</p>
+<p>&nbsp;</p>
+<section class="rba-command"><span class="rba-command-text">df -k</span></section>
+<p>&nbsp;</p>
+<p>The file systems in question should now have a lower value in the Use% column and a larger value in the Available column. The sample below shows, that 9448408 kilobytes have been made available again on <span class="rba-parameter" data-id="FILESYSTEM"></span>.</p>
+<p>Filesystem&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1K-blocks&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Used Available Use% Mounted on<br>/dev/mapper/system-root&nbsp; 15320532&nbsp; 10744612&nbsp;&nbsp; 3797680&nbsp; 74% /<br>/dev/mapper/appvg-apps&nbsp;&nbsp; 61923324&nbsp; 49329396&nbsp;&nbsp; 9448408&nbsp; 84% /opt<br>/dev/sda1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 154691&nbsp;&nbsp;&nbsp;&nbsp; 37620&nbsp;&nbsp;&nbsp; 109084&nbsp; 26% /boot</p>
+<p>If the recovered space on the file system is sufficient you can <span class="rba-goto" data-id="end"></span>this runbook. If not, continue this runbook.</p>

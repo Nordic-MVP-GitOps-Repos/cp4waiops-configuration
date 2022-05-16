@@ -1,0 +1,9 @@
+<p>Run the following command to determine how much space is available on the file system:</p>
+<p>&nbsp;</p>
+<section class="rba-command"><span class="rba-command-text">df -m</span></section>
+<p>&nbsp;</p>
+<p>The result should look similar to below. We can identify that the /opt file system has 21,094 MiB free space.</p><pre><code class="language-plaintext">Filesystem&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1M-blocks&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Used Available Use% Mounted on
+/dev/mapper/system-root&nbsp;&nbsp;&nbsp;&nbsp; 15320&nbsp;&nbsp;&nbsp;&nbsp; 11386&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3155&nbsp; 79% /
+/dev/mapper/appvg-apps&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 61923&nbsp;&nbsp;&nbsp;&nbsp; 37683&nbsp;&nbsp;&nbsp;&nbsp; 21094&nbsp; 65% /opt
+/dev/sda1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 154&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 37&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 109&nbsp; 26% /boot</code></pre>
+<p>Check the&nbsp;<span class="rba-parameter" data-id="FILESYSTEM"></span> file system and determine if the tablespace can be extended another 10% or not. From previous steps, we know that the tablespace currently consumes 32 MiB. 10% of this is appromately 3.2 MiB, this is lower than the free space on /opt and will therefore fit. If the number is larger than the available space on the file system, <span class="rba-goto" data-id="end"></span>this runbook and then escalate to the next support level.</p>

@@ -1,0 +1,78 @@
+<pre><code class="language-plaintext">/*
+ * utils.js
+ * Data conversion tool for runbooks (RBA).
+ * This tool converts HTML sources (website or local files)
+ * into runbooks in the RBA import format.
+ * Requires: node (node.js runtime)
+ * Version: 1
+ * Date: 2022-02-04
+ * Author: IBM
+ * © Copyright IBM Corp. 2021, 2022  All Rights Reserved.
+ * Use as is - no support
+ */
+// Shorten the given string to a maximum of maxChars, including
+// the "..." shortening indicator. MaxChars must be greater than 3.
+function shortenString(string, maxChars = 60) {
+    let shortened = string || ``;
+    if (maxChars &gt; 3 &amp;&amp; shortened.length &gt; maxChars - 3) {
+        shortened = `${shortened.substring(0, maxChars - 3)}...`;
+    }
+    return shortened;
+}
+// Simplify and collapse whitespace from the given string:
+// - replace all whitespace (e.g., newlines, &amp;nbsp;) with blanks
+// - replace sequences of blanks with a single blank
+// Returns the converted string
+function sanitizeWhitespace(string) {
+    let sanitized = string || ``;
+    sanitized = sanitized.replace(/\s/g, ` `);
+    sanitized = sanitized.replace(/  +/g, ` `);
+    return sanitized;
+}
+// Remove or convert extra whitespace that is located outside of pre-formatted blocks:
+// - Tokenize by &lt;pre&gt; and &lt;/pre&gt;
+// - Simplify and collapse whitespace from the parts that are outside outside of &lt;pre&gt;...&lt;/pre&gt; elements
+// - Supports nested &lt;pre&gt; elements, like "&lt;pre&gt;abc&lt;pre&gt;def&lt;/pre&gt;ghi&lt;/pre&gt;"
+//   as a single preformatted block
+// - If a starting &lt;pre&gt; is not matched by a closing &lt;/pre&gt;, then the complete text after
+//   the starting &lt;pre&gt; is treated as pre-formatted text
+function sanitizeStringOutsidePreformatted(string) {
+    const tokenArray = string.split(/(&lt;[/]?pre&gt;)/g);
+    let preformatLevel = 0;
+    const sanitizedArray = [];
+    for (let i = 0; i &lt; tokenArray.length; i++) {
+        const token = tokenArray[i];
+        if (token === `&lt;pre&gt;`) {
+            preformatLevel++;
+            sanitizedArray.push(token);
+        }
+        else if (token === `&lt;/pre&gt;`) {
+            preformatLevel--;
+            sanitizedArray.push(token);
+        }
+        else if (preformatLevel === 0) {
+            sanitizedArray.push(sanitizeWhitespace(token));
+        }
+        else {
+            sanitizedArray.push(token);
+        }
+    }
+    return sanitizedArray.join(``);
+}
+// Sanitize the string:
+//  - trim the string
+//  - reduce whitespace outside of preformatted (&lt;pre&gt;) blocks
+//  - finally, insert those newlines again that are actually required for preformatted blocks
+//    and have been replaced with &lt;CODE_BLOCK_NEWLINE&gt; substitutes before
+function sanitizeString(string) {
+    let sanitized = string || ``;
+    sanitized = sanitized.trim();
+    sanitized = sanitizeStringOutsidePreformatted(sanitized);
+    sanitized = sanitized.replace(/&lt;CODE_BLOCK_NEWLINE&gt;/g, `\n`);
+    return sanitized;
+}
+module.exports = {
+    shortenString,
+    sanitizeString
+};
+</code></pre>

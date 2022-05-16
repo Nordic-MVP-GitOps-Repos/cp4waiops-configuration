@@ -1,0 +1,68 @@
+{
+  "name": "Example: Handle high memory consuming process on Linux",
+  "description": "Procedure describing how to react to a high memory usage on a Linux system",
+  "steps": [
+    {
+      "title": "Disclaimer",
+      "number": 1,
+      "type": "manual",
+      "description": "Exported into step001.html"
+    },
+    {
+      "number": 2,
+      "description": "Exported into step002.html",
+      "title": "Login",
+      "type": "manual"
+    },
+    {
+      "number": 3,
+      "description": "Exported into step003.html",
+      "title": "Identify the process(es) consuming a high amount of memory",
+      "type": "manual"
+    },
+    {
+      "number": 4,
+      "description": "Exported into step004.html",
+      "title": "Stop the identified process(es) gracefully",
+      "type": "manual"
+    },
+    {
+      "number": 5,
+      "description": "Exported into step005.html",
+      "title": "Terminate the identified process(es)",
+      "type": "manual"
+    },
+    {
+      "number": 6,
+      "description": "Exported into step006.html",
+      "title": "Force the process(es) to stop",
+      "type": "manual"
+    },
+    {
+      "number": 7,
+      "description": "Exported into step007.html",
+      "title": "Escalate the issue to the next support level",
+      "type": "manual"
+    }
+  ],
+  "parameters": [
+    {
+      "name": "HOSTNAME",
+      "description": "Hostname or IP address of the Linux system having memory issues.",
+      "type": "string",
+      "minLength": 1
+    },
+    {
+      "name": "PROCESSID",
+      "description": "Process ID of the process consuming a lot of memory - will be determined during a runbook step.",
+      "type": "string"
+    }
+  ],
+  "tags": [
+    "memory",
+    "linux",
+    "sample"
+  ],
+  "_runbookId": "72a4e196-eaed-4174-8ac4-325be9ea149e",
+  "automations": {}
+}

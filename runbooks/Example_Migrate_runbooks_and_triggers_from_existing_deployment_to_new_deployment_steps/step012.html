@@ -1,0 +1,68 @@
+<pre><code class="language-plaintext">/*
+ * utils.js
+ * Transformation tool for runbooks (RBA).
+ * This tool compares a list of runbooks that have been exported previously
+ * from some RBA deployment to the list of runbooks that have been imported
+ * successfully to another RBA deployment. It lists all runbooks that have
+ * not been imported.
+ * Requires: node (node.js runtime)
+ * Version: 1
+ * Date: 2022-02-04
+ * Author: IBM
+ * © Copyright IBM Corp. 2021, 2022  All Rights Reserved.
+ * Use as is - no support
+ */
+/* eslint-disable no-console */
+const fs = require(`fs`);
+// ****************************  Utilities  ****************************
+// Get content of a file and parse it to JSON
+function readAndParseFile(fileName) {
+    let sourceContent = null;
+    try {
+        sourceContent = fs.readFileSync(fileName, {encoding: `utf8`});
+    } catch (error) {
+        console.log(`ERROR: Cannot read source file ${fileName}: ${error}`);
+        process.exit(1);
+    }
+    let parsedContent = null;
+    try {
+        parsedContent = JSON.parse(sourceContent);
+    } catch (error) {
+        console.log(`ERROR: Cannot parse ${fileName} to JSON: ${error}`);
+        console.log(`File content: "${sourceContent}"`);
+        process.exit(1);
+    }
+    return parsedContent;
+}
+// Recreate the output directory (avoid overlaps with previous export/import actions)
+function recreateDirectory(directoryName) {
+    try {
+        fs.rmdirSync(directoryName, {recursive: true});
+        fs.mkdirSync(directoryName, {recursive: true});
+    } catch (error) {
+        console.log(`ERROR while trying to remove and recreate directory ${directoryName}: ${error}`);
+    }
+}
+// Create the output directory if it does not yet exist
+function createDirectory(directoryName) {
+    try {
+        fs.mkdirSync(directoryName, {recursive: true});
+    } catch (error) {
+        console.log(`ERROR while trying to create directory ${directoryName}: ${error}`);
+    }
+}
+// Save the object to the output file
+function saveObjectToFile(theObject, filePath) {
+    try {
+        fs.writeFileSync(filePath, JSON.stringify(theObject, null, 4), {encoding: `utf8`});
+    } catch (error) {
+        console.log(`ERROR while trying to write to file ${filePath}: ${error}`);
+    }
+}
+module.exports = {
+    createDirectory,
+    readAndParseFile,
+    recreateDirectory,
+    saveObjectToFile
+};
+</code></pre>

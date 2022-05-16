@@ -1,0 +1,103 @@
+{
+  "name": "Example: Handle full DB2 tablespace on Linux",
+  "description": "Procedure describing how to handle a full DB2 tablespace on Linux. This runbook is applicable only for tablespaces which are not using AUTOMATIC STORAGE",
+  "steps": [
+    {
+      "title": "Disclaimer",
+      "number": 1,
+      "type": "manual",
+      "description": "Exported into step001.html"
+    },
+    {
+      "number": 2,
+      "description": "Exported into step002.html",
+      "title": "Login as DB2 instance owner",
+      "type": "manual"
+    },
+    {
+      "number": 3,
+      "description": "Exported into step003.html",
+      "title": "Connect to the database",
+      "type": "manual"
+    },
+    {
+      "number": 4,
+      "description": "Exported into step004.html",
+      "title": "Check how much space the tablespace currently occupies on file system",
+      "type": "manual"
+    },
+    {
+      "number": 5,
+      "description": "Exported into step005.html",
+      "title": "Determine the file system hosting the tablespace",
+      "type": "manual"
+    },
+    {
+      "number": 6,
+      "description": "Exported into step006.html",
+      "title": "Check how much space is available on the file system hosting the tablespace",
+      "type": "manual"
+    },
+    {
+      "number": 7,
+      "description": "Exported into step007.html",
+      "title": "Extend the tablespace by 10%",
+      "type": "manual"
+    },
+    {
+      "number": 8,
+      "description": "Exported into step008.html",
+      "title": "Verify successful tablespace extension",
+      "type": "manual"
+    }
+  ],
+  "parameters": [
+    {
+      "name": "HOSTNAME",
+      "description": "Hostname where DB2 is running",
+      "type": "string",
+      "minLength": 1
+    },
+    {
+      "name": "DB2_INSTANCE_OWNER",
+      "description": "DB2 instance owner, e.g. db2inst1",
+      "type": "string",
+      "minLength": 1
+    },
+    {
+      "name": "DB_NAME",
+      "description": "DB name, e.g. WAREHOUS",
+      "type": "string",
+      "minLength": 1
+    },
+    {
+      "name": "TABLESPACE_NAME",
+      "description": "Table space name",
+      "type": "string",
+      "minLength": 1
+    },
+    {
+      "name": "TABLESPACE_ID",
+      "description": "ID of the tablespace - will be determined as part of a step",
+      "type": "string"
+    },
+    {
+      "name": "PAGES_TO_ADD",
+      "description": "Number of pages to add to tablespace - will be determined as part of a step",
+      "type": "string"
+    },
+    {
+      "name": "FILESYSTEM",
+      "description": "Filesystem where tablespace is located - will be determined as part of a step",
+      "type": "string"
+    }
+  ],
+  "tags": [
+    "db2",
+    "linux",
+    "database",
+    "sample"
+  ],
+  "_runbookId": "e4bfabdc-5576-4a88-938e-c1905bfbe0e5",
+  "automations": {}
+}

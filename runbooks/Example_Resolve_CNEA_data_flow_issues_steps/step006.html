@@ -1,0 +1,8 @@
+<p>Check the eanoiaction service logs, and restart if you believe there should be connectivity to the object server pair but the actions service is not providing it. To check the eanoiactionservice logs use:</p>
+<p>
+<section class="rba-command"><span class="rba-command-text">oc logs $(oc get pod | grep eanoiaction | awk '{ print $1}')</span></section>
+</p>
+<p>To restart the eanoiactionservice:</p>
+<p>
+<section class="rba-command"><span class="rba-command-text">oc delete pod $(oc get pod | grep eanoiaction | awk '{ print $1}')</span></section>
+</p>

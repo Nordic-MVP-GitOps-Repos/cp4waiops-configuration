@@ -1,0 +1,47 @@
+<pre><code class="language-plaintext">/*
+ * checkForMissingRunbooks.js
+ * Transformation tool for runbooks (RBA).
+ * This tool compares a list of runbooks that have been exported previously
+ * from some RBA deployment to the list of runbooks that have been imported
+ * successfully to another RBA deployment. It lists all runbooks that have
+ * not been imported.
+ * Requires: node (node.js runtime)
+ * Version: 1
+ * Date: 2022-02-21
+ * Author: IBM
+ * © Copyright IBM Corp. 2021, 2022  All Rights Reserved.
+ * Use as is - no support
+ */
+/* eslint-disable no-console */
+const { readAndParseFile, createDirectory, saveObjectToFile } = require(`./utils`);
+const FAILED_IMPORTS_DIRECTORY = `./failedRunbookImports`;
+// ****************************  MAIN  ****************************
+const exportedRunbooksFileName = process.argv[2];
+const importedRunbooksFileName = process.argv[3];
+if (typeof exportedRunbooksFileName === `undefined` || typeof importedRunbooksFileName === `undefined`) {
+    console.log(`ERROR: Mandatory parameter missing`);
+    console.log(`Usage: node checkForMissingRunbooks.js &lt;exportedRunbooksFileName&gt; &lt;importedRunbooksFileName&gt;`);
+    process.exit(1);
+}
+const exportedRunbooks = readAndParseFile(exportedRunbooksFileName);
+const importedRunbooks = readAndParseFile(importedRunbooksFileName);
+if (exportedRunbooks.length === importedRunbooks.length) {
+    console.log(`SUCCESS: All exported runbooks have been imported`);
+}
+else {
+    console.log(`WARNING: ${exportedRunbooks.length} runbooks have been exported but only ${importedRunbooks.length} have been imported`);
+    for (let i = 0; i &lt; exportedRunbooks.length; i++) {
+        const exportedRunbook = exportedRunbooks[i];
+        const foundInImportedRunbooks = importedRunbooks.some(element =&gt; (element.readOnly._runbookId === exportedRunbook._runbookId));
+        if (foundInImportedRunbooks === false) {
+            console.log(`Missing: ${exportedRunbook._runbookId}: ${exportedRunbook.name}`);
+            createDirectory(FAILED_IMPORTS_DIRECTORY);
+            const runbookFilePath = `${FAILED_IMPORTS_DIRECTORY}/runbook.${exportedRunbook._runbookId}.json`;
+            // Save as array with single object, to be able to import it using the RBA import command
+            saveObjectToFile([exportedRunbook], runbookFilePath);
+        }
+    }
+    console.log(`Each missing runbook has been copied to directory ${FAILED_IMPORTS_DIRECTORY}.`);
+}
+process.exit(0);
+</code></pre>

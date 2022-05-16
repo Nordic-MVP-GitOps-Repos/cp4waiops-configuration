@@ -1,0 +1,5 @@
+<p>Verify the deletion of the runbook instances performed in step 6, by running the command from step 5 again to retrieve all runbook instances of a given timeframe:</p>
+<p>&nbsp;</p>
+<section class="rba-command"><span class="rba-command-text">curl -X GET -k&nbsp;<span class="rba-parameter" data-id="CURL_AUTHENTICATION"></span> "<span class="rba-parameter" data-id="CURL_BASEURL"></span>/runbookinstances?from=<span class="rba-parameter" data-id="START_DATE"></span>&amp;to=<span class="rba-parameter" data-id="END_DATE"></span>&amp;fields=_id"</span></section>
+<p>&nbsp;</p>
+<p>The output of this command must not contain any of the deleted runbook instances anymore.</p>

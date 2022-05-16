@@ -1,0 +1,273 @@
+<pre><code class="language-plaintext">/*
+ * crawler.js
+ * Data conversion tool for runbooks (RBA).
+ * This tool converts HTML sources (website or local files)
+ * into runbooks in the RBA import format.
+ * Requires: node (node.js runtime)
+ * Version: 1
+ * Date: 2022-02-04
+ * Author: IBM
+ * © Copyright IBM Corp. 2021, 2022  All Rights Reserved.
+ * Use as is - no support
+ */
+/* eslint-disable no-console */
+const { JSDOM } = require(`jsdom`);
+const { https } = require(`follow-redirects`);
+const { Link, linkFromHTML } = require(`./Link.js`);
+const { MINIMUM_HTTP_PAUSE, MAXIMUM_PARALLEL_REQUESTS, CRAWLER_DEPTH, ROOT_URL, START_URL, DATA_URL, RUNBOOK_DIRECTORY,
+    RUNBOOK_FILE_NAME, INFO, DEBUG, HTTPS_REQUEST_OPTIONS, DEBUG_RAW_DATA, LINK_ROOT_URL } = require(`./config.js`);
+const { convertToRunbook } = require(`./parser.js`);
+const fs = require(`fs`);
+// If needed, write the raw html data to console log and pass it to the resolve() function
+function handleRawData(data, responseUrl, resolve) {
+    if (DEBUG_RAW_DATA) {
+        console.log(`---------------- DATA BEGIN (source: ${responseUrl})-------------`);
+        console.log(data);
+        console.log(`---------------- DATA END -------------------------------------------\n`);
+        // If DEBUG_RAW_DATA is enabled and CRAWLER_DEPTH = 1:
+        // Single page, can be stored in a file for further analysis (more convenient than the console output)
+        if (CRAWLER_DEPTH === 1) {
+            const tempFileName = `./temp.source.raw.html`;
+            try {
+                fs.writeFileSync(tempFileName, data, {encoding: `utf8`});
+            } catch (error) {
+                console.log(`ERROR while trying to write to file ${tempFileName}: ${error}`);
+            }
+        }
+    }
+    resolve(data);
+}
+// Get the data from the given link location
+function httpRequester(link) {
+    return new Promise((resolve) =&gt; {
+        setTimeout(() =&gt; {
+            https.get(link.url, HTTPS_REQUEST_OPTIONS, (res) =&gt; {
+                let data = ``;
+                res.on(`data`, (chunk) =&gt; {
+                    data += chunk;
+                });
+                res.on(`end`, () =&gt; {
+                    // The follow-redirects package sets the "res.responseUrl" property
+                    if (DEBUG) console.log(`httpRequester: *  url         = ${link.url}`);
+                    if (DEBUG) console.log(`httpRequester: -&gt; responseUrl = ${res.responseUrl}`);
+                    // If needed, get the actual data from the DATA_URL
+                    if (res.responseUrl &amp;&amp; res.responseUrl.startsWith(ROOT_URL) &amp;&amp; ROOT_URL !== DATA_URL) {
+                        // Remember the page (responseUrl) where we have been redirected to
+                        link.responseUrl = res.responseUrl;
+                        // Get the actual page content
+                        const dataProviderUrl = res.responseUrl.replace(ROOT_URL, DATA_URL);
+                        if (DEBUG) console.log(`httpRequester: -&gt; providerUrl = ${dataProviderUrl}`);
+                        https.get(dataProviderUrl, HTTPS_REQUEST_OPTIONS, (res2) =&gt; {
+                            let data2 = ``;
+                            res2.on(`data`, (chunk2) =&gt; {
+                                data2 += chunk2;
+                            });
+                            res2.on(`end`, () =&gt; {
+                                handleRawData(data2, res2.responseUrl, resolve);
+                            });
+                        });
+                    }
+                    else {
+                        handleRawData(data, res.responseUrl, resolve);
+                    }
+                });
+            });
+        }, MINIMUM_HTTP_PAUSE);
+    });
+}
+// Collect all links from the given bodyDocument. These are the candidates for the next level of depth
+// of web crawling.
+function getForwardLinks(bodyDocument) {
+    return Array.from(bodyDocument.querySelectorAll(`a`)).filter(el =&gt; el.getAttribute(`href`));
+}
+// Crawl over the given chunk of links for the current level of depth of web crawling.
+async function crawlSingleChunk(chunkLinks, linkUrls, newLinks, newLinkUrls, linkUrlsChecked, titleList, runbooks) {
+    let promises;
+    let chunkHtmls;
+    // Load html data for chunk
+    try {
+        promises = chunkLinks.map(link =&gt; httpRequester(link));
+        chunkHtmls = await Promise.all(promises);
+    } catch (err) {
+        console.err(err.message);
+    }
+    // Merge html data with links
+    chunkLinks = chunkLinks.map((el, index) =&gt; {
+        const newEl = el;
+        newEl.bodyHtml = chunkHtmls[index];
+        return newEl;
+    }).filter(el =&gt; el.bodyHtml);
+    // Remember the forward links from the source documents (for the next level of depth of web crawling)
+    // eslint-disable-next-line no-loop-func
+    chunkLinks.forEach((link) =&gt; {
+        const bodyDocument = (new JSDOM(link.bodyHtml)).window.document;
+        // Add any available link for next iteration
+        getForwardLinks(bodyDocument).forEach((el) =&gt; {
+            try {
+                // Accept links that start with LINK_ROOT_URL but not with ROOT_URL only if some redirect
+                // is expected to occur, i.e., if LINK_ROOT_URL and ROOT_URL are not substrings of each other
+                const isRedirectAllowed = !ROOT_URL.startsWith(LINK_ROOT_URL) &amp;&amp; !LINK_ROOT_URL.startsWith(ROOT_URL);
+                const newForwardLink = linkFromHTML(el);
+                let ignoreReason = ``;
+                if (newForwardLink.url.startsWith(ROOT_URL) || (isRedirectAllowed &amp;&amp; newForwardLink.url.startsWith(LINK_ROOT_URL))) {
+                    if (!newLinkUrls.includes(newForwardLink.url)) {
+                        if (!linkUrlsChecked.includes(newForwardLink.url)) {
+                            if (!linkUrls.includes(newForwardLink.url)) {
+                                if (DEBUG) console.log(`crawlSingleChunk: adding forward link: ${newForwardLink.url}`);
+                                newLinks.push(newForwardLink);
+                                newLinkUrls.push(newForwardLink.url);
+                            }
+                            else {
+                                ignoreReason = `already contained in linkUrls`;
+                            }
+                        }
+                        else {
+                            ignoreReason = `already contained in linkUrlsChecked`;
+                        }
+                    }
+                    else {
+                        ignoreReason = `already contained in newLinkUrls`;
+                    }
+                }
+                else {
+                    ignoreReason = `URL does not start with ROOT_URL or LINK_ROOT_URL`;
+                }
+                if (ignoreReason.length &gt; 0) {
+                    if (DEBUG) console.log(`crawlSingleChunk: ignoring forward link: ${el.href} - ${newForwardLink.url}, reason: ${ignoreReason}`);
+                }
+            } catch (err) {
+                console.warn(`Error with link URL ${el.href}: ${err.stack}`);
+            }
+        });
+        // Try to convert this bodyDocument to a runbook and add it to "runbooks"
+        convertToRunbook(bodyDocument, link, linkUrlsChecked, titleList, runbooks);
+    });
+}
+// Root function for web crawling
+async function proceduralCrawl(initialLink) {
+    let links = [initialLink];
+    let linkUrls = links.map(l =&gt; l.url);
+    const runbooks = [];
+    // Monitoring: Remember which links and runbook titles we have included already, to avoid duplicates
+    const linkUrlsChecked = [];
+    const titleList = [];
+    /* eslint-disable no-await-in-loop */
+    for (let curDepth = 1; (curDepth &lt;= CRAWLER_DEPTH) &amp;&amp; (links.length &gt; 0); curDepth += 1) {
+        // Generate chunks from links
+        const chunks = links.reduce((arr, el) =&gt; {
+            const newArray = arr;
+            if (arr[arr.length - 1].length &lt; MAXIMUM_PARALLEL_REQUESTS) {
+                newArray[arr.length - 1].push(el);
+            } else {
+                newArray.push([el]);
+            }
+            return newArray;
+        }, [[]]);
+        // Initiate array to save new links for next iteration
+        const newLinks = [];
+        const newLinkUrls = [];
+        // eslint-disable-next-line no-loop-func
+        // Execute crawling for every chunk
+        for (let i = 0; i &lt; chunks.length; i += 1) {
+            await crawlSingleChunk(chunks[i], linkUrls, newLinks, newLinkUrls, linkUrlsChecked, titleList, runbooks);
+            if (INFO) console.log(`Depth ${curDepth} of ${CRAWLER_DEPTH} - chunk ${i + 1} of ${chunks.length} done - runbooks found so far: ${runbooks.length}`);
+        }
+        // All chunks are finished - save new links for next iteration
+        if (DEBUG) console.log(`newLinks: ${newLinks.length}`);
+        if (DEBUG) console.log(`newLinkUrls: ${newLinkUrls.length}`);
+        links = newLinks;
+        linkUrls = newLinkUrls;
+    }
+    if (DEBUG) console.log(`Runbooks: ${JSON.stringify(runbooks, null, 4)}`);
+    if (INFO) console.log(`Runbooks created: ${runbooks.length}`);
+    /* eslint-enable no-await-in-loop */
+    return runbooks;
+}
+// Retrieve file names for directory crawling
+function getHtmlFileNames(rootDir, startDirOrFile) {
+    const rootDirWithSlash = (rootDir.endsWith(`/`)) ? rootDir : `${rootDir}/`;
+    let htmlFileNames = [];
+    if (rootDir === startDirOrFile) {
+        try {
+            htmlFileNames = fs.readdirSync(rootDirWithSlash);
+            htmlFileNames = htmlFileNames.filter(fileName =&gt; (fileName.endsWith(`.htm`) || fileName.endsWith(`.html`)));
+            htmlFileNames = htmlFileNames.filter(fileName =&gt; (!fileName.startsWith(`~$`)));
+            htmlFileNames = htmlFileNames.map(fileName =&gt; rootDirWithSlash + fileName);
+        }
+        catch (error) {
+            console.log(`ERROR while reading ${rootDirWithSlash}: ${error}`);
+        }
+    }
+    else {
+        try {
+            const singleFileExists = fs.existsSync(startDirOrFile);
+            if (singleFileExists === true) {
+                htmlFileNames.push(startDirOrFile);
+            }
+            else {
+                console.log(`ERROR while searching for ${startDirOrFile}: File does not exist`);
+            }
+        }
+        catch (error) {
+            console.log(`ERROR while searching for ${startDirOrFile}: ${error}`);
+        }
+    }
+    return htmlFileNames;
+}
+// Get content of a file
+function readSourceFile(fileName) {
+    let sourceContent = null;
+    try {
+        sourceContent = fs.readFileSync(fileName, {encoding: `utf8`});
+    } catch (error) {
+        console.log(`ERROR: Cannot read source file ${fileName}: ${error}`);
+    }
+    return sourceContent;
+}
+// Root function for directory crawling
+async function proceduralCrawlDirectory() {
+    const htmlFileNames = getHtmlFileNames(ROOT_URL, START_URL);
+    const runbooks = [];
+    const titleList = [];
+    htmlFileNames.forEach(htmlFileName =&gt; {
+        let sourceContent = readSourceFile(htmlFileName);
+        const link = new Link(htmlFileName, htmlFileName);
+        link.bodyHtml = sourceContent;
+        const linkUrlsChecked = [];
+        const bodyDocument = (new JSDOM(sourceContent)).window.document;
+        // Try to convert this bodyDocument to a runbook and add it to "runbooks"
+        convertToRunbook(bodyDocument, link, linkUrlsChecked, titleList, runbooks);
+    });
+    if (DEBUG) console.log(`Runbooks: ${JSON.stringify(runbooks, null, 4)}`);
+    if (INFO) console.log(`Runbooks created: ${runbooks.length}`);
+    return runbooks;
+}
+// Entry point for crawling: decides if web crawling or directory crawling is needed
+async function crawl() {
+    let runbooks = [];
+    if (ROOT_URL.startsWith(`http://`) || ROOT_URL.startsWith(`https://`)) {
+        if (START_URL.startsWith(ROOT_URL)) {
+            const link = new Link(START_URL, ``);
+            runbooks = await proceduralCrawl(link);
+        }
+        else {
+            console.log(`ERROR: START_URL (${START_URL}) does not start with ROOT_URL (${ROOT_URL})`);
+        }
+    }
+    else {
+        runbooks = await proceduralCrawlDirectory();
+    }
+    return runbooks;
+}
+// Save the runbooks to the output file
+async function saveRunbooks(runbooks) {
+    const runbookFilePath = `${RUNBOOK_DIRECTORY}/${RUNBOOK_FILE_NAME}`;
+    try {
+        fs.mkdirSync(RUNBOOK_DIRECTORY, {recursive: true});
+        fs.writeFileSync(runbookFilePath, JSON.stringify(runbooks, null, 4), {encoding: `utf8`});
+    } catch (error) {
+        console.log(`ERROR while trying to write to file ${runbookFilePath}: ${error}`);
+    }
+}
+module.exports = { crawl, saveRunbooks };
+</code></pre>

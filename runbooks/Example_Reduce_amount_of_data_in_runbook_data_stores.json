@@ -1,0 +1,89 @@
+{
+  "name": "Example: Reduce amount of data in runbook data stores",
+  "description": "Offload runbook execution data into a secondary data store for auditing/long-term-storage purposes and delete that data from the production data store to ensure lower disc space usage and faster response times on the active system.",
+  "steps": [
+    {
+      "number": 1,
+      "description": "Exported into step001.html",
+      "title": "Introduction",
+      "type": "manual"
+    },
+    {
+      "title": "Set the value of CURL_BASEURL",
+      "number": 2,
+      "type": "manual",
+      "description": "Exported into step002.html"
+    },
+    {
+      "number": 3,
+      "description": "Exported into step003.html",
+      "title": "Generate API key and set the value of CURL_AUTHENTICATION",
+      "type": "manual"
+    },
+    {
+      "title": "Test the connectivity to the RBA API endpoint (optional)",
+      "description": "Exported into step004.html",
+      "number": 4,
+      "type": "manual"
+    },
+    {
+      "number": 5,
+      "description": "Exported into step005.html",
+      "title": "Extract execution data",
+      "type": "manual"
+    },
+    {
+      "number": 6,
+      "description": "Exported into step006.html",
+      "title": "Delete execution data",
+      "type": "manual"
+    },
+    {
+      "number": 7,
+      "description": "Exported into step007.html",
+      "title": "Verify deletion",
+      "type": "manual"
+    },
+    {
+      "number": 8,
+      "description": "Exported into step008.html",
+      "title": "Delete API key",
+      "type": "manual"
+    }
+  ],
+  "parameters": [
+    {
+      "name": "CURL_BASEURL",
+      "description": "See step 2 for instructions how to create the value for this parameter. You can start with an empty value but you have to supply a value before proceeding to step 3.",
+      "type": "string",
+      "minLength": 0
+    },
+    {
+      "name": "CURL_AUTHENTICATION",
+      "description": "See step 3 for instructions how to create the value for this parameter. You can start with an empty value but you have to supply a value before proceeding to step 4.",
+      "type": "string",
+      "minLength": 0,
+      "format": "password"
+    },
+    {
+      "name": "START_DATE",
+      "description": "The start date of the time frame from which runbook instances should be deleted, e.g. 2022-01-01. You can also leave the value empty, which has the effect of \"7 days ago\".",
+      "type": "string",
+      "minLength": 0
+    },
+    {
+      "name": "END_DATE",
+      "description": "The end date of the time frame from which runbook instances should be deleted, e.g. 2022-02-22. You can also leave the value empty, which has the effect of \"today\".",
+      "type": "string",
+      "minLength": 0
+    }
+  ],
+  "tags": [
+    "rba",
+    "data",
+    "filesystem",
+    "sample"
+  ],
+  "_runbookId": "5cd422bc-6625-490c-8aed-385120df1445",
+  "automations": {}
+}

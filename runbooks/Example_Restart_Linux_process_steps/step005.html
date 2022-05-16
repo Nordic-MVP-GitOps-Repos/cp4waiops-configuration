@@ -1,0 +1,5 @@
+<p>Run the command below to check whether the process is now running:</p>
+<p>&nbsp;</p>
+<section class="rba-command"><span class="rba-command-text">ps -eo args | grep -E "<span class="rba-parameter" data-id="PROCESSNAME"></span>( .*|$)" | grep -v grep</span></section>
+<p>&nbsp;</p>
+<p>If the result returned contains a line with the processname <span class="rba-parameter" data-id="PROCESSNAME"></span>plus any optional additional information then the process is running. If the command didn't return a result the process is not yet running. Your application might need more time to start. Wait for one minute, then repeat the check. If the process is not running after 10 minutes, open a ticket.</p>

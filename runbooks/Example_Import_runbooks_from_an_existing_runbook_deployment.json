@@ -1,0 +1,125 @@
+{
+  "name": "Example: Import runbooks from an existing runbook deployment",
+  "description": "Provides instructions to export runbooks from one deployment, and to import them to another deployment. Uses the RBA API for both operations. Step 2 explains how to define the runbook parameter values, so you can start this runbook without having defined the parameter values at first.",
+  "steps": [
+    {
+      "title": "Before you start",
+      "description": "Exported into step001.html",
+      "number": 1,
+      "type": "manual"
+    },
+    {
+      "title": "Set the value of SOURCE_BASEURL to specify the deployment where you want to export runbooks from",
+      "number": 2,
+      "type": "manual",
+      "description": "Exported into step002.html"
+    },
+    {
+      "title": "Set the value of TARGET_BASEURL to specify the deployment where you want to import runbooks to",
+      "number": 3,
+      "type": "manual",
+      "description": "Exported into step003.html"
+    },
+    {
+      "title": "Generate source API key and set the value of SOURCE_AUTHENTICATION",
+      "number": 4,
+      "type": "manual",
+      "description": "Exported into step004.html"
+    },
+    {
+      "title": "Generate target API key and set the value of TARGET_AUTHENTICATION",
+      "number": 5,
+      "type": "manual",
+      "description": "Exported into step005.html"
+    },
+    {
+      "title": "Review parameter SOURCE_SINGLERUNBOOKID",
+      "description": "Exported into step006.html",
+      "number": 6,
+      "type": "manual"
+    },
+    {
+      "title": "Test the connectivity to the source RBA API endpoint (optional)",
+      "description": "Exported into step007.html",
+      "number": 7,
+      "type": "manual"
+    },
+    {
+      "title": "Test the connectivity to the target RBA API endpoint (optional)",
+      "description": "Exported into step008.html",
+      "number": 8,
+      "type": "manual"
+    },
+    {
+      "title": "Export runbooks from source deployment",
+      "description": "Exported into step009.html",
+      "number": 9,
+      "type": "manual"
+    },
+    {
+      "title": "Split the file exportedRunbooks.json (if needed)",
+      "description": "Exported into step010.html",
+      "number": 10,
+      "type": "manual"
+    },
+    {
+      "title": "Import runbooks to target deployment",
+      "description": "Exported into step011.html",
+      "number": 11,
+      "type": "manual"
+    },
+    {
+      "title": "Delete source API key",
+      "number": 12,
+      "type": "manual",
+      "description": "Exported into step012.html"
+    },
+    {
+      "title": "Delete target API key",
+      "number": 13,
+      "type": "manual",
+      "description": "Exported into step013.html"
+    }
+  ],
+  "parameters": [
+    {
+      "name": "SOURCE_BASEURL",
+      "description": "See step 2 for instructions how to create the value for this parameter. You can start with an empty value but you have to supply a value before proceeding to step 3.",
+      "type": "string",
+      "minLength": 0
+    },
+    {
+      "name": "TARGET_BASEURL",
+      "description": "See step 3 for instructions how to create the value for this parameter. You can start with an empty value but you have to supply a value before proceeding to step 4.",
+      "type": "string",
+      "minLength": 0
+    },
+    {
+      "name": "SOURCE_AUTHENTICATION",
+      "description": "See step 4 for instructions how to create the value for this parameter. You can start with an empty value but you have to supply a value before proceeding to step 5.",
+      "type": "string",
+      "minLength": 0,
+      "format": "password"
+    },
+    {
+      "name": "TARGET_AUTHENTICATION",
+      "description": "See step 5 for instructions how to create the value for this parameter. You can start with an empty value but you have to supply a value before proceeding to step 6.",
+      "type": "string",
+      "minLength": 0,
+      "format": "password"
+    },
+    {
+      "name": "SOURCE_SINGLERUNBOOKID",
+      "description": "If only a single runbook should get exported, set this parameter to the forward slash (/) followed by the runbook ID",
+      "type": "string",
+      "default": ""
+    }
+  ],
+  "tags": [
+    "rbaexport",
+    "rbaimport",
+    "sample"
+  ],
+  "_runbookId": "5e787f22-3281-4012-bc4b-79e4548492dd",
+  "automations": {}
+}

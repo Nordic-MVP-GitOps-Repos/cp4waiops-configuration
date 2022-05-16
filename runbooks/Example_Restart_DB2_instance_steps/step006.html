@@ -1,0 +1,8 @@
+<p>Check whether the DB2 instance is a single partition DB2:</p>
+<p>&nbsp;</p>
+<section class="rba-command"><span class="rba-command-text">grep -v "^[ ]*$" ~/sqllib/db2nodes.cfg | wc -l | awk '{print span-grp }'</span></section>
+<p>&nbsp;</p>
+<p>If this command returns 1, you have a single partition DB2. In case of a single partition DB2, perform an IPC Cleanup:</p>
+<p>&nbsp;</p>
+<section class="rba-command"><span class="rba-command-text">~/sqllib/bin/ipclean -a</span></section>
+<p>&nbsp;</p>

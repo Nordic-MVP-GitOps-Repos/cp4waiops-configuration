@@ -1,0 +1,5 @@
+<p>If the generated runbook file (e.g., "runbooks.rba.docs.import.json" or "importRunbooks.json") is larger than 1 MB, then it cannot be imported in a single operation. Instead, it has to be split into multiple JSON files, and each of them has to be imported separately.</p>
+<p>If you have the "jq" tool installed, you can use the command</p>
+<section class="rba-command"><span class="rba-command-text">cat importRunbooks.json | jq .[] -c | split -l 100 --filter='jq . -cs &gt; $FILE' - importRunbooks.json.</span></section>
+<p>to split the file into chunks of 100 runbooks each, named importRunbooks.json.aa, importRunbooks.json.ab, etc. If the chunk files are still too large, then use a value that is lower than 100, and iterate this process until each chunk file has a size of less than 1 MB.</p>
+<p>Then import each of the chunks to your runbook deployment.</p>

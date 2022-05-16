@@ -1,0 +1,9 @@
+<p>Run the following command to identify the tablespace ID and calculate the current size in bytes of the tablespace on the file system:</p>
+<p>&nbsp;</p>
+<section class="rba-command"><span class="rba-command-text">db2 "select TBSP_ID As \"ID\",TBSP_TOTAL_SIZE_KB * TBSP_TOTAL_PAGES As \"Tablespace size in bytes\" from SYSIBMADM.TBSP_UTILIZATION WHERE TBSP_NAME = '<span class="rba-parameter" data-id="TABLESPACE_NAME"></span>' and TBSP_STATE='NORMAL' and TBSP_TYPE='DMS'"</span></section>
+<p>&nbsp;</p>
+<p>The result should display the tablespace ID and the size of the tablespace, similar to the example below:</p><pre><code class="language-plaintext">db2inst1@db2server:~&gt; db2 "select TBSP_ID As (…)"
+ID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Tablespace size in bytes
+------------------------ ------------------------
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 7&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 33554432</code></pre>
+<p><br>The example shows the information that the tablespace ID is 7 and that it currently consumes 33,554,432 bytes (32 MiB). Go back to runbook details and add that number as the value of runbook parameter TABLESPACE_ID. Press apply then and proceed with the next step.</p>

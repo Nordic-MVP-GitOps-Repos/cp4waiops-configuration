@@ -1,0 +1,60 @@
+{
+  "name": "Call the catfacts to remedy problem",
+  "description": "Create a new issue in a GitHub repository using the template defined in the automation. This runbook in combination with its referenced automation action (see step 1) can also be used as an example how to create a fully automated runbook in general.",
+  "steps": [
+    {
+      "title": "test",
+      "number": 1,
+      "type": "automation",
+      "automationId": "a8daf3e4c246ab8ab784cbb668000799",
+      "mappings": []
+    }
+  ],
+  "parameters": [],
+  "tags": [
+    "git",
+    "github",
+    "sample"
+  ],
+  "_runbookId": "845653a8-b1df-431e-8835-5ec638c77e23",
+  "automations": {
+    "a8daf3e4c246ab8ab784cbb668000799": {
+      "name": "Call catfacts",
+      "type": "HTTP",
+      "description": "",
+      "parameters": [],
+      "fields": [
+        {
+          "name": "method",
+          "value": "GET",
+          "encoding": "ascii",
+          "description": "method of the https request"
+        },
+        {
+          "name": "host",
+          "value": "https://catfact.ninja/fact",
+          "encoding": "ascii",
+          "description": "url of the https request"
+        },
+        {
+          "name": "body",
+          "value": "",
+          "encoding": "ascii",
+          "description": "body of the https request"
+        },
+        {
+          "name": "header",
+          "value": "{\"Accept\":\"application/json\"}",
+          "encoding": "ascii",
+          "description": "header of the https request"
+        },
+        {
+          "name": "ignoreCertErrors",
+          "value": "false",
+          "encoding": "ascii",
+          "description": "ignore certificate errors for request"
+        }
+      ]
+    }
+  }
+}

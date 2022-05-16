@@ -1,0 +1,9 @@
+<p>Check whether the ea-actions topic is populated:
+<section class="rba-command"><span class="rba-command-text">oc exec -ti <span class="rba-parameter" data-id="releaseName"></span>-kafka-0 -- ../../opt/kafka/bin/kafka-console-consumer.sh --from-beginning --bootstrap-server localhost:9092 --topic ea-actions</span></section>
+</p>
+<p>If no entries are present check the inference service logs:</p>
+<p>
+<section class="rba-command"><span class="rba-command-text">oc logs $(kubectl get pod | grep inference | awk '{print $1}')</span></section>
+</p>
+<p>Restart the service, if required:</p>
+<section class="rba-command"><span class="rba-command-text">oc delete pod $(kubectl get pod | grep inference | awk '{print $1}')</span></section>

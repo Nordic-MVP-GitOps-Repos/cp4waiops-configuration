@@ -1,0 +1,8 @@
+<p>Check whether the itsm.status.external.json kafka topic is populated, by issuing the following command:</p>
+<p>
+<section class="rba-command"><span class="rba-command-text">oc exec -ti <span class="rba-parameter" data-id="releaseName"></span>-kafka-0 -- ../../opt/kafka/bin/kafka-console-consumer.sh --from-beginning --bootstrap-server localhost:9092 --topic itsm.status.external.json</span></section>
+</p>
+<p>If no status messages are there, restart the topology-status service using the following command:</p>
+<p>
+<section class="rba-command"><span class="rba-command-text">oc delete $(kubectl get pod | grep topology-status | awk '{print $1}')</span></section>
+</p>

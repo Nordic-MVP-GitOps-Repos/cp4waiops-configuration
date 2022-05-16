@@ -1,0 +1,326 @@
+<p>This code block contains a list of bullet icon characters. As you copy-paste the code from this and the other code blocks into your own files, make sure that special characters are preserved.</p><pre><code class="language-plaintext">/*
+ * config.js
+ * Data conversion tool for runbooks (RBA).
+ * This tool converts HTML sources (website or local files)
+ * into runbooks in the RBA import format.
+ * Requires: node (node.js runtime)
+ * Version: 1
+ * Date: 2022-03-01
+ * Author: IBM
+ * © Copyright IBM Corp. 2021, 2022  All Rights Reserved.
+ * Use as is - no support
+ */
+/* eslint-disable max-len */
+// General instructions:
+// - Review all converted and imported runbooks (both for relevance and for completeness) before publishing them
+//   and making them available for production.
+// - If the converted runbooks do not match your expectations, check if you can achieve better results by tuning
+//   the parameters in this configuration file.
+// - If you are still not satisfied with the results, feel free to modify this sample code and adjust it to your
+//   specific requirements.
+// Each of the following patterns describes a combination of expected source document elements that appear in a
+// sequence and that together are to be interpreted as one runbook.
+// The runbook patterns are evaluated in order: As soon as there is a match to the pattern (i.e., a runbook with
+// one or multiple steps has been derived from the document), the remaining patterns are not evaluated.
+// If searching for a runbook title (by titleElementCSS) returns a title, AND if the corresponding search for
+// step titles (by stepTitleElementCSS) returns at least one step, then this pattern is used for the document.
+// You can add or remove patterns as needed, and you can modify patterns to suit you particular needs.
+// Additional hints for some of the pattern properties:
+// - titleElementCSS: Typical candidates are `h1`, `h1.title`, `title`, `h1.topictitle1`
+// - titleIgnoreSubstrings: Drop all potential runbooks if one of those substrings exists within their title.
+//              The actual values in this example are all derived from the Wikipedia-based example below, in
+//              order to suppress creation of some runbooks that seem to be meaningless.
+// - stepTitleInSeparateContainer: If "false", then the direct siblings of the step title element are considered
+//              as step content. If "true", then the step title is expected to be the child of a parent container
+//              ("div"), and the siblings of that parent container are considered as step content.
+//              This property is typically "false". It needs to be "true" for the IBM Documentation.
+// - stepDefaultListType: Specifies the list type to be used if the list type cannot be detected from the source
+//              document. Valid values are either `ol` (ordered lists) or `ul` (unordered lists).
+// - tagMetaAttributeNames: Interpret the content of all "meta" elements with
+//              an attribute name in this list as valid tags for the runbook
+// --- Pattern for:
+//     - Plain HTML pages/files
+//     - GitHub pages
+//     - MediaWiki pages
+//     - Some HTML pages/files as exported from MS Word (with particular title and step title convention)
+// eslint-disable-next-line no-unused-vars
+const PATTERN_STANDARD = {
+    titleElementCSS: `body h1`,
+    titleIgnoreSubstrings: [
+        `File:`, `Help:`, `Portal:`,
+        `Recent changes`, `Related changes`,
+        `Talk:`, `Template:`, `Template talk:`,
+        `User talk:`, `User contributions`
+    ],
+    descriptionElementNames: [`p`, `shortdesc`],
+    descriptionElementClasses: [`MsoNormal`],
+    stepTitleElementCSS: `body h2`,
+    stepTitleInSeparateContainer: false,
+    stepContainerElementNames:  [`div`],
+    stepTextElementNames: [`p`, `h3`, `h4`, `blockquote`],
+    stepTextElementClasses: [`MsoNormal`],
+    stepListElementNames: [`ol`, `ul`],
+    stepListItemElementClasses: [
+        `bx--list__item`,
+        `Markdown-module--list-item--32ShB`,
+        `MsoListParagraph`,
+        `MsoListParagraphCxSpFirst`,
+        `MsoListParagraphCxSpMiddle`,
+        `MsoListParagraphCxSpLast`
+    ],
+    stepDefaultListType: `ol`,
+    stepIgnoreElementNames: [`img`],
+    tagMetaAttributeNames: [`keywords`, `dc.subject`]
+};
+// --- Pattern for:
+//     - IBM Documentation pages
+// eslint-disable-next-line no-unused-vars
+const PATTERN_IBM_DOCUMENTATION = {
+    titleElementCSS: `body h1`,
+    titleIgnoreSubstrings: [`We’re sorry!`, `Continue exploring`],
+    descriptionElementNames: [`p`],
+    descriptionElementClasses: [`section prereq`, `shortdesc`],
+    stepTitleElementCSS: `body h1`,
+    stepTitleInSeparateContainer: false,
+    stepContainerElementNames:  [`div`],
+    stepTextElementNames: [`p`, `h2`, `h3`, `h4`],
+    stepTextElementClasses: [],
+    stepListElementNames: [`ol`, `ul`, `dl`],
+    stepListItemElementClasses: [`dlterm`, `dlentry`],
+    stepDefaultListType: `ol`,
+    stepIgnoreElementNames: [`img`],
+    tagMetaAttributeNames: [`keywords`, `dc.subject`]
+};
+// --- Pattern for:
+//     - Some HTML pages/files as exported from MS Word (with particular title and step title convention)
+// eslint-disable-next-line no-unused-vars
+const PATTERN_MSO = {
+    titleElementCSS: `body p.MsoTitle`,
+    titleIgnoreSubstrings: [],
+    descriptionElementNames: [],
+    descriptionElementClasses: [`MsoNormal`],
+    stepTitleElementCSS: `body h1`,
+    stepTitleInSeparateContainer: false,
+    stepContainerElementNames:  [`div`],
+    stepTextElementNames: [],
+    stepTextElementClasses: [`MsoNormal`],
+    stepListElementNames: [],
+    stepListItemElementClasses: [
+        `MsoListParagraph`,
+        `MsoListParagraphCxSpFirst`,
+        `MsoListParagraphCxSpMiddle`,
+        `MsoListParagraphCxSpLast`
+    ],
+    stepDefaultListType: `ol`,
+    stepIgnoreElementNames: [`img`],
+    tagMetaAttributeNames: [`keywords`, `dc.subject`]
+};
+// --- Pattern for:
+//     - Documents that have their title defined as a "title" element outside of the
+//       document body
+//     - Therefore, the paragraphs next to the title are not suitable to be interpreted
+//       as the document description (as indicated by `ignore-non-body-description`; you
+//       could also just leave these properties empty)
+// eslint-disable-next-line no-unused-vars
+const PATTERN_TITLE_H1 = {
+    titleElementCSS: `title`,
+    titleIgnoreSubstrings: [],
+    descriptionElementNames: [`ignore-non-body-description`],
+    descriptionElementClasses: [`ignore-non-body-description`],
+    stepTitleElementCSS: `main h1`,
+    stepTitleInSeparateContainer: false,
+    stepContainerElementNames:  [`div`],
+    stepTextElementNames: [`p`],
+    stepTextElementClasses: [],
+    stepListElementNames: [`ol`, `ul`],
+    stepListItemElementClasses: [],
+    stepDefaultListType: `ol`,
+    stepIgnoreElementNames: [`img`],
+    tagMetaAttributeNames: [`keywords`, `dc.subject`]
+};
+// --- Pattern for:
+//     - Pages that do not use various levels of headings to distinguish between the
+//       title and the steps, but just contain a title and then various paragraphs
+//     - To distinguish the "higher level paragraphs" that should end up as step titles
+//       from "paragraphs with plain content" in our test file (as derived from a document
+//       that was originally created using LibreOffice, and then exported to HTML), we
+//       use the paragraph-level class "p.Text_20_body" to find the step titles.
+//     - The beginning of that step-level information is also repeated in the runbook
+//       description (as configured in descriptionElementNames/descriptionElementClasses).
+//     - For our test files, this pattern is the "last resort" if no other pattern matches.
+//     - Obviously, this pattern may or may not match for your files, but it shows another
+//       way how to use the stepTitleElementCSS for structuring the input data.
+// eslint-disable-next-line no-unused-vars
+const PATTERN_H1_PARAGRAPH = {
+    titleElementCSS: `body h1`,
+    titleIgnoreSubstrings: [],
+    descriptionElementNames: [`p`],
+    descriptionElementClasses: [`Text_20_body`],
+    stepTitleElementCSS: `body p.Text_20_body`,
+    stepTitleInSeparateContainer: false,
+    stepContainerElementNames:  [`div`],
+    stepTextElementNames: [],
+    stepTextElementClasses: [],
+    stepListElementNames: [`ol`, `ul`],
+    stepListItemElementClasses: [],
+    stepDefaultListType: `ol`,
+    stepIgnoreElementNames: [`img`],
+    tagMetaAttributeNames: [`keywords`, `dc.subject`]
+};
+// RUNBOOK_FILE_NAME: Target file name for the converted runbooks.
+// If the target file exists already, it is replaced without warning.
+// See actual definition below (we use different file names for different sample configurations)
+// RUNBOOK_NAME_SUFFIX: Optional suffix that gets appended to the name of each converted runbook.
+// See actual definition below (we use different values for different sample configurations)
+// ========= Alternative 1: READ FROM DIRECTORY =========
+// ROOT_URL: The directory where the source files are located
+// START_URL: If START_URL =  ROOT_URL, then the tool converts all *.htm/*html files from ROOT_URL
+//            If START_URL != ROOT_URL, then the tool converts the single file START_URL (for debugging and development)
+// DATA_URL: Equal to ROOT_URL
+// CRAWLER_DEPTH: Unused
+// LINK_ROOT_URL: URL prefix to be used in the runbook when relative links from the source document need to be converted
+//            to absolute links to the original location.
+// RUNBOOK_DEFAULT_TAGS: The list of default tags to be added to the converted runbooks
+// const ROOT_URL = `./sourceData/`;
+// const START_URL = ROOT_URL;
+// const DATA_URL = ROOT_URL;
+// const CRAWLER_DEPTH = 1;
+// const LINK_ROOT_URL = `https://en.wikipedia.org`;
+// const RUNBOOK_DEFAULT_TAGS = [`converted-html-local`];
+// const RUNBOOK_NAME_SUFFIX = ``;
+// const RUNBOOK_FILE_NAME = `runbooks.import.json`;
+// const RUNBOOK_PATTERNS = [PATTERN_STANDARD, PATTERN_MSO, PATTERN_TITLE_H1, PATTERN_H1_PARAGRAPH];
+// ========= Alternative 2: WEB/WIKI CRAWLER - Sample 1: Red Hat OpenShift Container Platform =========
+// ROOT_URL: The root URL that must be part of any URL that is considered during crawling, and while following links
+// START_URL: The first document to be evaluated
+// DATA_URL: Typically equal to ROOT_URL, but in some cases (like IBM Documentation) the
+//            actual data need to be retrieved from yet another content API URL (in the browser, this kind of URL forwarding
+//            is handled automatically, but some extra effort is needed for this crawler).
+//            In this case, the DATA_URL is identical to the ROOT_URL.
+// CRAWLER_DEPTH: The maximum depth for following links. Start with a low value (e.g., 3) and inspect the result data.
+//            Once you are satisfied with the quality of the result data, increase this value as appropriate.
+//            With CRAWLER_DEPTH = 3, this configuration generates 12 runbooks (as of 2022-03-01).
+// LINK_ROOT_URL: URL prefix to be used in the runbook when relative links from the source document need to be converted
+//            to absolute links to the original location.
+//            In this case, the LINK_ROOT_URL is identical to the ROOT_URL.
+// RUNBOOK_DEFAULT_TAGS: The list of default tags to be added to the converted runbooks
+//   === DISCLAIMER for converting pages from IBM documentation or Red Hat documentation ===
+//     Note that the internal structure of documentation pages may change at any time without notice.
+//     If you observe that the tool does not create reasonable output, then most likely the internal structure
+//     has changed.
+//     In this case, you should change this configuration file and start using Wikipedia as sample input:
+//          - disable section "Alternative 2: WEB/WIKI CRAWLER - Sample 1: Red Hat OpenShift Container Platform"
+//          - enable section "Alternative 2: WEB/WIKI CRAWLER - Sample 2: Wikipedia"
+const START_URL = `https://docs.openshift.com/container-platform/4.9/support/troubleshooting/troubleshooting-installations.html`;
+const ROOT_URL = `https://docs.openshift.com/container-platform/4.9/support/troubleshooting`;
+const DATA_URL = ROOT_URL;
+const CRAWLER_DEPTH = 3;
+const LINK_ROOT_URL = ROOT_URL;
+const RUNBOOK_DEFAULT_TAGS = [`converted-ocp-troubleshooting`];
+const RUNBOOK_NAME_SUFFIX = ` (from Red Hat OCP 4.9)`;
+const RUNBOOK_FILE_NAME = `runbooks.ocp.docs.import.json`;
+const RUNBOOK_PATTERNS = [PATTERN_STANDARD];
+// ========= Alternative 2: WEB/WIKI CRAWLER - Sample 2: Wikipedia =========
+// Disclaimer: Wikipedia is probably not really a source of very meaningful runbooks.
+//             This example is intended to demonstrate how the crawler and the conversion works,
+//             based on a website that is available to the public and that returns data very quickly.
+//             Once you feel comfortable with the conversion process, you can switch to using your
+//             own document source.
+// const START_URL = `https://en.wikipedia.org/wiki/Wikipedia:Wiki_Game`;
+// const ROOT_URL = `https://en.wikipedia.org/wiki`;
+// const DATA_URL = ROOT_URL;
+// const CRAWLER_DEPTH = 2;
+// const LINK_ROOT_URL = `https://en.wikipedia.org`;
+// const RUNBOOK_DEFAULT_TAGS = [`converted-html-wikipedia`];
+// const RUNBOOK_NAME_SUFFIX = ` (from Wikipedia)`;
+// const RUNBOOK_FILE_NAME = `runbooks.wikipedia.import.json`;
+// const RUNBOOK_PATTERNS = [PATTERN_STANDARD];
+// ========= Additional configuration =========
+// The directory where the JSON file that contains the converted runbooks (RUNBOOK_FILE_NAME) should be written to.
+// If needed, the directory is created by the tool.
+const RUNBOOK_DIRECTORY = `./resultData`;
+// Prefix for the reference to the source document, as it is added to the runbook description.
+// You can replace the string with your preferred localized string.
+const SOURCE_REFERENCE_STRING = `Source`;
+// Optional: For each runbook, add a first step that explains that this runbook has been
+// converted and should be validated first, before it is published and ready to be used
+// in production.
+// Set "includeStep" to "false" if you do not want the disclaimer to be added to each runbook.
+// You can adjust the stepTitle and the stepDescription as needed for your organization.
+const RUNBOOK_DISCLAIMER_STEP = {
+    includeStep: true,
+    includeListOfImages: true,
+    stepTitle: `DISCLAIMER`,
+    stepDescription: `This runbook has been generated from $$SOURCE$$ and should be reviewed before it
+        is used in production. Once you have validated the content and the format of this runbook, you
+        can remove this step and publish the runbook.`,
+    stepDescriptionImages: `The source document contains $$SOURCE_NUM_IMAGES$$ images that have not been
+        copied into this runbook. You can add the images manually. Large image files should be reduced
+        in file size (e.g., by taking a screen shot), as runbooks must have a total size of at most 1 MB.
+        This is the list of images in the source document: $$SOURCE_IMAGES_LIST$$`
+};
+// If any of the following strings appears at the beginning of an element that is considered as a list item,
+// then the list is interpreted as an unordered list.
+const BULLET_ITEM_INDICATORS = [`&lt;B7&gt;`, `�`, `•`, `►`];
+// Remove all matches to the following regex patterns from all step descriptions within the generated runbooks.
+// For example, eliminate all &lt;span&gt; elements that just contain a bullet item or an ordinal number:
+// - Unordered lists are bulleted automatically, so we want to avoid having duplicate bullets.
+// - Similarly for ordered lists, we want to avoid duplicate numberings.
+// Also, eliminate all empty paragraphs.
+const HTML_SANITIZE_PATTERNS = [
+    /&lt;span&gt;•&lt;\/span&gt;/g,
+    /&lt;span&gt;([0-9])+\.&lt;\/span&gt;/g,
+    /&lt;p&gt;\s*&lt;\/p&gt;/g
+];
+// Crawler HTTP load and performance: Allows to throttle the load on the network
+const MINIMUM_HTTP_PAUSE = 500;
+const MAXIMUM_PARALLEL_REQUESTS = 100;
+// WEB/WIKI CRAWLER
+// For pages from the public internet, it is typically not needed to specify additional request headers.
+// However, for intranet pages, some kind of authentication token is required.
+// A missing authentication token may result in a response like: "302 Found".
+// To find the request options that you need to access your intranet pages:
+// - Open a new private browser window and open one of the wiki pages in the browser.
+// - This causes a redirect to the login page.
+// - After login, the required data are available within the browser cookies.
+// - Copy the cookies and other required header data from the browser into the HTTPS_REQUEST_OPTIONS object,
+//   and run the conversion tool (but note that typically the cookies need to be refreshed regularly).
+// - Feel free to replace this simple mechanism in the source code of this tool by a better login mechanism
+//   (e.g., using basic auth) as appropriate for your organization.
+const HTTPS_REQUEST_OPTIONS = {};
+// const HTTPS_REQUEST_OPTIONS = {
+//     headers: {
+//         "User-Agent": `Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0`,
+//         "Accept": `text/html`,
+//         "Referer": `&lt;InsertYourIntranetLoginRefererHere&gt;`,
+//         "Cookie": `session=********; xxx=********`
+//     },
+// };
+// Verbosity of diagnostic output
+const INFO = true;
+const DEBUG = true;
+const DEBUG_RAW_DATA = true;
+module.exports = {
+    BULLET_ITEM_INDICATORS,
+    CRAWLER_DEPTH,
+    HTTPS_REQUEST_OPTIONS,
+    MINIMUM_HTTP_PAUSE,
+    MAXIMUM_PARALLEL_REQUESTS,
+    RUNBOOK_DEFAULT_TAGS,
+    RUNBOOK_DISCLAIMER_STEP,
+    RUNBOOK_DIRECTORY,
+    RUNBOOK_NAME_SUFFIX,
+    RUNBOOK_FILE_NAME,
+    RUNBOOK_PATTERNS,
+    ROOT_URL,
+    START_URL,
+    DATA_URL,
+    LINK_ROOT_URL,
+    SOURCE_REFERENCE_STRING,
+    HTML_SANITIZE_PATTERNS,
+    DEBUG,
+    DEBUG_RAW_DATA,
+    INFO
+};
+</code></pre>
+<p>&nbsp;</p>

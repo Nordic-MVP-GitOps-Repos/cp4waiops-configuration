@@ -1,0 +1,19 @@
+<pre><code class="language-plaintext">/*
+ * index.js
+ * Data conversion tool for runbooks (RBA).
+ * This tool converts HTML sources (website or local files)
+ * into runbooks in the RBA import format.
+ * Requires: node (node.js runtime)
+ * Version: 1
+ * Date: 2022-02-04
+ * Author: IBM
+ * © Copyright IBM Corp. 2021, 2022  All Rights Reserved.
+ * Use as is - no support
+ */
+const crawler = require(`./crawler`);
+// Do the async crawling, and save the converted data to a JSON file
+(async () =&gt; {
+    const runbooks = await crawler.crawl();
+    crawler.saveRunbooks(runbooks);
+})();
+</code></pre>

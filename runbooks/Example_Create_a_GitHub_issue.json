@@ -1,0 +1,193 @@
+{
+  "name": "Example: Create a GitHub issue",
+  "description": "Create a new issue in a GitHub repository using the template defined in the automation. This runbook in combination with its referenced automation action (see step 1) can also be used as an example how to create a fully automated runbook in general.",
+  "steps": [
+    {
+      "title": "Open a new GitHub issue (make sure to supply meaningful parameter values before you run the automated step)",
+      "number": 1,
+      "type": "automation",
+      "automationId": "6f8a7a315492bd8ed8164c4cd80043df",
+      "mappings": [
+        {
+          "automationParameterName": "$user",
+          "parameterMappingType": "parameter",
+          "parameterValue": "user"
+        },
+        {
+          "automationParameterName": "$pass",
+          "parameterMappingType": "parameter",
+          "parameterValue": "token"
+        },
+        {
+          "automationParameterName": "$account",
+          "parameterMappingType": "parameter",
+          "parameterValue": "account"
+        },
+        {
+          "automationParameterName": "$repo",
+          "parameterMappingType": "parameter",
+          "parameterValue": "repo"
+        },
+        {
+          "automationParameterName": "$title",
+          "parameterMappingType": "parameter",
+          "parameterValue": "title"
+        },
+        {
+          "automationParameterName": "$label",
+          "parameterMappingType": "parameter",
+          "parameterValue": "label"
+        },
+        {
+          "automationParameterName": "$issue",
+          "parameterMappingType": "parameter",
+          "parameterValue": "issue"
+        },
+        {
+          "automationParameterName": "$author",
+          "parameterMappingType": "userName",
+          "parameterValue": ""
+        }
+      ]
+    }
+  ],
+  "parameters": [
+    {
+      "name": "user",
+      "description": "The user to authenticate to GitHub",
+      "type": "string"
+    },
+    {
+      "name": "token",
+      "description": "The GitHub access token to authenticate the request",
+      "type": "string"
+    },
+    {
+      "name": "account",
+      "description": "GitHub Account Name",
+      "type": "string"
+    },
+    {
+      "name": "repo",
+      "description": "GitHub repository name",
+      "type": "string"
+    },
+    {
+      "name": "title",
+      "description": "The title of the issue. This is visible in the issue list of the repository",
+      "type": "string"
+    },
+    {
+      "name": "label",
+      "description": "An optional label to be used, e.g. \"bug\" or \"enhancement\"",
+      "type": "string"
+    },
+    {
+      "name": "issue",
+      "description": "The issue text. Describe the expected and actual behaviour you observed.",
+      "type": "string"
+    }
+  ],
+  "tags": [
+    "git",
+    "github",
+    "sample"
+  ],
+  "_runbookId": "bfd25285-0a88-47a7-bb3d-0645e41d546c",
+  "automations": {
+    "6f8a7a315492bd8ed8164c4cd80043df": {
+      "name": "Open GitHub Issue",
+      "type": "HTTP",
+      "description": "Creates a new GitHub issue following the template defined in this automation.",
+      "parameters": [
+        {
+          "name": "$user",
+          "value": "",
+          "description": "The username associated to the GitHub API access token",
+          "type": "string"
+        },
+        {
+          "name": "$pass",
+          "value": "",
+          "description": "The API token/password to access the GitHub API",
+          "type": "string"
+        },
+        {
+          "name": "$account",
+          "value": "",
+          "description": "The account under which the GitHub repo is present",
+          "type": "string"
+        },
+        {
+          "name": "$repo",
+          "value": "",
+          "description": "The name of the GitHub repository",
+          "type": "string"
+        },
+        {
+          "name": "$title",
+          "value": "",
+          "description": "The title of the GitHub issue",
+          "type": "string"
+        },
+        {
+          "name": "$label",
+          "value": "",
+          "description": "An optional label to classify the issue",
+          "default": "bug",
+          "type": "string"
+        },
+        {
+          "name": "$issue",
+          "value": "",
+          "description": "A texual description of the problem. Describe what is the problem and the difference to the expectation",
+          "type": "string"
+        },
+        {
+          "name": "$author",
+          "value": "",
+          "description": "The name of the person reporting this issue",
+          "type": "string"
+        }
+      ],
+      "fields": [
+        {
+          "name": "method",
+          "value": "POST",
+          "encoding": "ascii",
+          "description": "method of the https request"
+        },
+        {
+          "name": "host",
+          "value": "https://api.github.com/repos/$account/$repo/issues",
+          "encoding": "ascii",
+          "description": "url of the https request"
+        },
+        {
+          "name": "body",
+          "value": "{ \"title\" : \"$title\", \"labels\": [ \"$label\" ], \"body\" : \"# New Issue created by Automation via Watson AIOps\\n* Reported by: $author\\n* Issue: $issue\\n\" }",
+          "encoding": "ascii",
+          "description": "body of the https request"
+        },
+        {
+          "name": "header",
+          "value": "{\"user-agent\":\"rba-as\"}",
+          "encoding": "ascii",
+          "description": "header of the https request"
+        },
+        {
+          "name": "ignoreCertErrors",
+          "value": "false",
+          "encoding": "ascii",
+          "description": "ignore certificate errors for request"
+        },
+        {
+          "name": "authen",
+          "description": "authen of the https request",
+          "encoding": "ascii",
+          "value": "{\"password\":\"$pass\",\"username\":\"$user\"}"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,12 @@
+<p>Check whether the collated actions topic is populated:
+<section class="rba-command"><span class="rba-command-text">oc exec -ti <span class="rba-parameter" data-id="releaseName"></span>-kafka-0 -- ../../opt/kafka/bin/kafka-console-consumer.sh --from-beginning --bootstrap-server localhost:9092 --topic ea-collatedactions</span></section>
+</p>
+<p>If no recent entries are present check the collator service logs for errors with the command:</p>
+<p>
+<section class="rba-command"><span class="rba-command-text">oc logs $(oc get po | grep coll | awk '{ print $1}')</span></section>
+</p>
+<p>If errors are present, restart redis and the collator service:</p>
+<p>
+<section class="rba-command"><span class="rba-command-text">oc delete po  $(oc get po | grep coll | awk 'NR>0 {print $1}') $(oc get po | grep redis | awk 'NR>0 {print $1}')</span></section>
+</p>
+<p>If this does not resolve the issue, restart the dedup and normaliser to rule out a transport issue to actions.</p>

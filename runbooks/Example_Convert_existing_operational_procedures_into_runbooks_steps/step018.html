@@ -1,0 +1,17 @@
+<p>The conversion tool accepts input documents in HTML format.</p>
+<ul>
+  <li>If you are using some kind of web or intranet based documentation, then the conversion tool is able to "crawl" that web site and get the HTML documents directly from there (as you have seen above).</li>
+  <li>If you are using a different format (e.g., pdf, doc, odt) then you need to convert the source files to HTML format first. Many tools like Microsoft Word and LibreOffice support exporting documents in HTML format.</li>
+  <li>There are tools (e.g., provided by developer communities) that support batch conversion of various input formats to HTML format.</li>
+  <li>When you convert local source files from any type of format to HTML files as input for the conversion tool, ensure that the resulting HTML files do not contain unknown characters. For example, sometimes Umlaut characters are not properly exported to the HTML files.</li>
+  <li>You can ignore those cases when the replacement character (�) is used instead of a bullet at the beginning of a list item. In the context of a list item, this replacement character will be interpreted as an indicator that an unordered list should be used. You can customize the list of expected indicators for unordered lists in the configuration file of the conversion&nbsp;tool.</li>
+</ul>
+<p>The configuration file (config.js) includes two ready-to-use sample sections for converting runbooks from web pages (IBM Documentation and Wikipedia) and one sample section for converting&nbsp;runbooks from the local file system.</p>
+<p>In many cases, adjusting this configuration file will be sufficient to generate runbooks that are of high quality and that contain a high percentage of the content of the original source documents.</p>
+<p>If you find that some aspect of the conversion&nbsp;tool itself does not satisfy your particular needs, then feel free to adjust the tool accordingly. It is sample code that that is provided as-is and that you may tailor to your specific requirements.</p>
+<p>As you advance to converting&nbsp;your own runbooks, you should plan to:</p>
+<ul>
+  <li>Allow some time to figure out which patterns (see the next step for an explanation) are suited best to match the structure of your current operational procedures, and potentially to tune these patterns.</li>
+  <li>Allow some time to verify that the resulting runbooks are complete. In particular, images are not converted and need to be added manually.</li>
+</ul>
+<p>&nbsp;</p>

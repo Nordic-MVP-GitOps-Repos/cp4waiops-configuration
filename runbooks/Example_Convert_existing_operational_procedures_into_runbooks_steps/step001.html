@@ -1,0 +1,18 @@
+<p>This runbook provides a conversion tool and related instructions that assist you in getting started with migrating your current set of operational procedures (file based or web/wiki based) to runbooks.</p>
+<p>The steps in this runbook cover the following activities:</p>
+<ol>
+  <li>Install the tool</li>
+  <li>Run the tool to convert some troubleshooting pages from the Red Hat OpenShift Container Platform documentation into runbooks</li>
+  <li>Import the runbooks to your runbook deployment</li>
+  <li>Adjust the tool to convert and import your own runbooks</li>
+</ol>
+<p>The conversion tool is a Node.js based standalone application that is contained within this runbook. Open a command shell to install and work with the tool:</p>
+<ul>
+  <li>The command shell does not need to be running within the target deployment.</li>
+  <li>You need to have internet access to run the tool with the default configuration.</li>
+  <li>You need to have network access to the public runbook REST API and an API key to authenticate your requests. You will be instructed how to create the API key, and also to delete or recreate the API key in the last step of this runbook, as the&nbsp;API&nbsp;key&nbsp;password&nbsp;will&nbsp;be&nbsp;visible&nbsp;in&nbsp;the&nbsp;execution&nbsp;record&nbsp;of&nbsp;this&nbsp;runbook.</li>
+  <li>You need to have the curl command available to import the runbooks to your target deployment.</li>
+  <li>You need to have at least version 14.15.4 of the Node.js runtime installed to run the tool.</li>
+  <li>There are a few dependencies that you will install as you execute this runbook step by step.</li>
+</ul>
+<p>&nbsp;</p>

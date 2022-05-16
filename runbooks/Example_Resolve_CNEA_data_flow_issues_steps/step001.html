@@ -1,0 +1,19 @@
+<p>Before proceeding to any step, ensure you have kubectl/oc access to the project where the aiops instance is deployed.</p>
+<p>Check if ingestion is working. That means: Is it pushing events to the ea-events kafka topic? Issue the following command:
+<section class="rba-command"><span class="rba-command-text">oc exec -ti <span class="rba-parameter" data-id="releaseName"></span>-kafka-0 -- ../../opt/kafka/bin/kafka-console-consumer.sh --from-beginning --bootstrap-server localhost:9092 --topic ea-events</span></section>
+</p>
+<p>If events are not reaching the ea-events topic check the CNEA gateway & Ingestion logs by running the following commands:</p>
+<p>
+<section class="rba-command"><span class="rba-command-text">oc logs $(kubectl get po | grep ingestion | awk '{print $1}')</span></section>
+</p>
+<p>
+<section class="rba-command"><span class="rba-command-text">oc logs $(kubectl get po | grep eanoigateway | awk '{print $1}')</span></section>
+</p>
+<p>Restart the gateway and/or the Ingestion if required using the following commands:</p>
+<p>
+<section class="rba-command"><span class="rba-command-text">oc delete pod $(kubectl get po | grep ingestion | awk '{print $1}')</span></section>
+</p>
+<p>
+<section class="rba-command"><span class="rba-command-text">oc delete pod $(kubectl get po | grep eanoigateway | awk '{print $1}')</span></section>
+</p>
+<p>If events exist in the ea-events kafka topic then proceed.</p>

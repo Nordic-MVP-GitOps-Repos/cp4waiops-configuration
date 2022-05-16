@@ -1,0 +1,63 @@
+{
+  "name": "Example: Cleanup a file system on Linux",
+  "description": "Steps to clean up a Linux file system",
+  "steps": [
+    {
+      "title": "Disclaimer",
+      "number": 1,
+      "type": "manual",
+      "description": "Exported into step001.html"
+    },
+    {
+      "number": 2,
+      "description": "Exported into step002.html",
+      "title": "Determine file systems that need cleanup",
+      "type": "manual"
+    },
+    {
+      "number": 3,
+      "description": "Exported into step003.html",
+      "title": "Delete temporary files, dumps, and old log files from the file system",
+      "type": "manual"
+    },
+    {
+      "number": 4,
+      "description": "Exported into step004.html",
+      "title": "Purge temporary file system and/or directory",
+      "type": "manual"
+    },
+    {
+      "number": 5,
+      "description": "Exported into step005.html",
+      "title": "Verify the efficacy of the performed actions",
+      "type": "manual"
+    },
+    {
+      "number": 6,
+      "description": "Exported into step006.html",
+      "title": "Determine the top 10 space consuming directories",
+      "type": "manual"
+    }
+  ],
+  "parameters": [
+    {
+      "name": "HOSTNAME",
+      "description": "Hostname of server with full file system",
+      "type": "string",
+      "minLength": 1
+    },
+    {
+      "name": "FILESYSTEM",
+      "description": "File system to clean up",
+      "type": "string",
+      "minLength": 1
+    }
+  ],
+  "tags": [
+    "linux",
+    "filesystem",
+    "sample"
+  ],
+  "_runbookId": "ca5102fa-1d06-42e9-82fa-c31ee99d372e",
+  "automations": {}
+}

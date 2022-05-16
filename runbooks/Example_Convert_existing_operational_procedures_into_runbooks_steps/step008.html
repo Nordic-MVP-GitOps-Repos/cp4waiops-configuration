@@ -1,0 +1,533 @@
+<pre><code class="language-plaintext">/*
+ * parser.js
+ * Data conversion tool for runbooks (RBA).
+ * This tool converts HTML sources (website or local files)
+ * into runbooks in the RBA import format.
+ * Requires: node (node.js runtime)
+ * Version: 1
+ * Date: 2022-02-04
+ * Author: IBM
+ * © Copyright IBM Corp. 2021, 2022  All Rights Reserved.
+ * Use as is - no support
+ */
+/* eslint-disable no-console */
+const { sanitizeString, shortenString } = require(`./utils.js`);
+const { Runbook } = require(`./Runbook.js`);
+const { RUNBOOK_PATTERNS, RUNBOOK_DEFAULT_TAGS, DEBUG, BULLET_ITEM_INDICATORS,
+    HTML_SANITIZE_PATTERNS } = require(`./config.js`);
+// Supported list types are "ol" and "ul"
+function getListType(itemText, pattern) {
+    let containsBullet = false;
+    for (let i = 0; i &lt; BULLET_ITEM_INDICATORS.length; i++) {
+        const indicator = BULLET_ITEM_INDICATORS[i];
+        if (itemText.startsWith(indicator)) {
+            containsBullet = true;
+            break;
+        }
+    }
+    return containsBullet ? `ul` : pattern.stepDefaultListType;
+}
+// Discard all runbook title candidates that contain items of pattern.titleIgnoreSubstrings
+function isTitleAccepted(title, pattern) {
+    let isOk = true;
+    for (let i = 0; i &lt; pattern.titleIgnoreSubstrings.length &amp;&amp; isOk === true; i++) {
+        const ignoreSubstring = pattern.titleIgnoreSubstrings[i];
+        isOk = (title.indexOf(ignoreSubstring) &lt; 0);
+    }
+    return isOk;
+}
+// Tags should be trimmed, lowercase, no blanks within (replace with dashes)
+function keywordToTag(keyword) {
+    let tag = (keyword) ? keyword.trim() : ``;
+    tag = tag.toLowerCase();
+    tag = tag.replace(/ /g, `-`);
+    return tag;
+}
+// Convert the keyword to a tag. If it is valid, then add it to the tags.
+function addToTags(keyword, tags) {
+    const tagCandidate = keywordToTag(keyword);
+    if (tagCandidate.length &gt; 0 &amp;&amp; !tags.includes(tagCandidate)) {
+        tags.push(tagCandidate);
+    }
+}
+// Convert the RUNBOOK_DEFAULT_TAGS to valid tags and return them
+function getDefaultTags() {
+    const defaultTags = [];
+    RUNBOOK_DEFAULT_TAGS.forEach(keyword =&gt; {
+        addToTags(keyword, defaultTags);
+    });
+    return defaultTags;
+}
+// Remove duplicate item indicators and whitespace from the itemText
+function sanitizeListItem(itemText) {
+    let sanitized = itemText || ``;
+    // Cut out all bullet item indicators
+    BULLET_ITEM_INDICATORS.forEach(bulletPattern =&gt; {
+        sanitized = sanitized.split(bulletPattern).join(``);
+    });
+    // Remove leading numbers from itemText
+    sanitized = sanitized.replace(/^([0-9])+\.\s*/, ``);
+    // Remove whitespace
+    return sanitizeString(sanitized);
+}
+// Convert the "raw" itemHtml to html format that is supported by the RBA UI
+function sanitizeHTML(itemHtml, pageRoot) {
+    let sanitized = itemHtml || ``;
+    // Replace relative links with absolute links, but avoid duplicate forward slashes
+    sanitized = sanitized.replace(/href="(?!http)/g, `href="${pageRoot}/`);
+    sanitized = sanitized.split(`href="${pageRoot}//`).join(`href="${pageRoot}/`);
+    // Remove all HTML classes and styles
+    sanitized = sanitized.replace(/(\s(class|style)="[^"]*")/g, ``);
+    // Replace all sample code (&lt;samp&gt; or &lt;pre&gt;&lt;code&gt;) with code blocks that are supported by the RBA UI
+    sanitized = sanitized.replace(/(&lt;samp&gt;|&lt;pre&gt;\s*&lt;code&gt;)/g, `&lt;pre&gt;&lt;code class="language-plaintext"&gt;`);
+    sanitized = sanitized.replace(/(&lt;\/samp&gt;)/g, `&lt;/code&gt;&lt;/pre&gt;`);
+    // Eliminate the matches to all patters in HTML_SANITIZE_PATTERNS
+    HTML_SANITIZE_PATTERNS.forEach(pattern =&gt; {
+        sanitized = sanitized.replace(pattern, ``);
+    });
+    return sanitized;
+}
+// Convert the given tableArea HTML element ("thead", "tbody", or "tfoot") to the table format
+// that is supported by RBA. Footers ("tfoot") are not supported by the RBA tables and are converted to "tbody".
+// For more details, see function sanitizeTableContent().
+function sanitizeTableArea(tableArea) {
+    let areaTypeName = tableArea.localName;
+    if (areaTypeName === `tfoot`) {
+        areaTypeName = `tbody`;
+        if (DEBUG) console.log(`sanitizeTableArea: Convert ${tableArea.localName} to ${areaTypeName}`);
+    }
+    if (DEBUG) console.log(`sanitizeTableArea (${areaTypeName}): ${shortenString(sanitizeString(tableArea.textContent), 60)}`);
+    const areaTypeFieldName = (areaTypeName === `thead`) ? `th` : `td`;
+    let areaContent = `&lt;${areaTypeName}&gt;`;
+    for (let i = 0; i &lt; tableArea.children.length; i++) {
+        const tableRow = tableArea.children[i];
+        // All of the children of tableArea are expected to be table rows (tr)
+        if (tableRow.localName === `tr`) {
+            areaContent += `&lt;tr&gt;`;
+            for (let j = 0; j &lt; tableRow.children.length; j++) {
+                const tableDefinition = tableRow.children[j];
+                if (tableDefinition.localName === `th` || tableDefinition.localName === `td`) {
+                    areaContent += `&lt;${areaTypeFieldName}&gt;${sanitizeString(tableDefinition.textContent)}&lt;/${areaTypeFieldName}&gt;`;
+                }
+                else {
+                    if (DEBUG) console.log(`sanitizeTableArea ignore: field (${tableDefinition.localName}): ${tableDefinition.textContent}`);
+                }
+            }
+            areaContent += `&lt;/tr&gt;`;
+        }
+        else {
+            areaContent += sanitizeTableOtherRow(tableRow);
+        }
+    }
+    areaContent += `&lt;/${areaTypeName}&gt;`;
+    return areaContent;
+}
+// If we encounter an unexpected element at the level of a table row or table area, then convert that to a simple
+// table row (to avoid dropping the content altogether).
+function sanitizeTableOtherRow(tableUnknownElement) {
+    if (DEBUG) console.log(`sanitizeTableOther (${tableUnknownElement.localName}): ${shortenString(tableUnknownElement.textContent, 60)}`);
+    return `&lt;tr&gt;&lt;td&gt;${sanitizeString(tableUnknownElement.textContent)}&lt;td&gt;&lt;/tr&gt;`;
+}
+// Only tables with the following formats are supported by this tool (and no further styles etc.):
+// &lt;table&gt;
+//   &lt;thead&gt;
+//     &lt;tr&gt;&lt;th&gt;Country&lt;/th&gt;&lt;th&gt;City&lt;/th&gt;&lt;th&gt;River&lt;/th&gt;&lt;th&gt;Size&lt;/th&gt;&lt;/tr&gt;
+//   &lt;/thead&gt;
+//   &lt;tbody&gt;
+//     &lt;tr&gt;&lt;td&gt;US&lt;/td&gt;&lt;td&gt;NY&lt;/td&gt;&lt;td&gt;Hudson&lt;/td&gt;&lt;td&gt;XL&lt;/td&gt;&lt;/tr&gt;
+//     &lt;tr&gt;&lt;td&gt;DE&lt;/td&gt;&lt;td&gt;Fra&lt;/td&gt;&lt;td&gt;Main&lt;/td&gt;&lt;td&gt;M&lt;/td&gt;&lt;/tr&gt;
+//   &lt;/tbody&gt;
+// &lt;/table&gt;
+// or
+// &lt;table&gt;
+//   &lt;tr&gt;&lt;td&gt;US&lt;/td&gt;&lt;td&gt;NY&lt;/td&gt;&lt;td&gt;Hudson&lt;/td&gt;&lt;td&gt;XL&lt;/td&gt;&lt;/tr&gt;
+//   &lt;tr&gt;&lt;td&gt;DE&lt;/td&gt;&lt;td&gt;Fra&lt;/td&gt;&lt;td&gt;Main&lt;/td&gt;&lt;td&gt;M&lt;/td&gt;&lt;/tr&gt;
+// &lt;/table&gt;
+// In case of the second format (without HTML groups), the HTML parser inserts a default "tbody" area
+// that encloses the &lt;tr&gt; elements, so we can assume "tbody" to exist even if this is not explicitly specified
+// in the source HTML code.
+// All content from the table header fields and from the table definition fields are just copied as plain text
+// (i.e., the textContent, without any further HTML formatting).
+function sanitizeTableContent(tableElement) {
+    let tableContent = `&lt;table&gt;`;
+    for (let i = 0; i &lt; tableElement.children.length; i++) {
+        const tableArea = tableElement.children[i];
+        if (tableArea.localName === `thead` || tableArea.localName === `tbody` || tableArea.localName === `tfoot`) {
+            tableContent += sanitizeTableArea(tableArea);
+        }
+        else if (tableArea.localName === `colgroup`) {
+            if (DEBUG) console.log(`sanitizeTableContent: ignoring column formatting (${tableArea.localName})`);
+        }
+        else {
+            tableContent += sanitizeTableOtherRow(tableArea);
+        }
+    }
+    tableContent += `&lt;/table&gt;`;
+    return tableContent;
+}
+// Step description snippets are used to collect the data that will end up in one runbook step.
+// In particular, the object remembers if we are currently evaluating a list, so we can finish the list
+// when an element is found that is not a list element any more.
+// This feature is not needed for HTML sources with "proper" HTML lists.
+// This feature is needed for some document formats that define lists implicitly (for example, see the
+// sample pattern PATTERN_MSO).
+// The "pageRoot" parameter needs to be used whenever converting a relative URL (from a href element)
+// to an absolute URL (because within the resulting runbook, the original relative URLs cannot be
+// resolved any more).
+function createStepDescriptionSnippet(pageRoot) {
+    // The listType indicates if we are currently collecting data for a list:
+    //   - empty string: no list started
+    //   - "ul": unordered list
+    //   - "ol": ordered list
+    return {
+        stepTitle: ``,
+        stepDescription: ``,
+        listType: ``,
+        pageRoot: pageRoot,
+        nextElement: null
+    };
+}
+// If the stepDescriptionSnippet indicates that a list is being evaluated, finish that list now
+function finishList(stepDescriptionSnippet) {
+    if (stepDescriptionSnippet.stepDescription.length &gt; 0 &amp;&amp; stepDescriptionSnippet.listType.length &gt; 0) {
+        // Finish the list
+        stepDescriptionSnippet.stepDescription = `${stepDescriptionSnippet.stepDescription}&lt;/${stepDescriptionSnippet.listType}&gt;`;
+        stepDescriptionSnippet.listType = ``;
+    }
+}
+// Convert the stepDescriptionSnippet to a step and add it to the list of steps
+function finishStep(stepDescriptionSnippet, steps) {
+    // If we could not find step content, then fall back to repeat the step title
+    // (instead of discarding this step)
+    if (stepDescriptionSnippet.stepDescription.length === 0) {
+        stepDescriptionSnippet.stepDescription = stepDescriptionSnippet.stepTitle;
+    }
+    finishList(stepDescriptionSnippet);
+    const step = {
+        title: sanitizeString(stepDescriptionSnippet.stepTitle),
+        description: sanitizeString(stepDescriptionSnippet.stepDescription),
+        number: steps.length + 1,
+        type: `manual`
+    };
+    steps.push(step);
+    if (DEBUG) console.log(`finishStep CREATED: ${JSON.stringify(step, null, 4)}`);
+}
+// Elements "&lt;pre&gt;&lt;code&gt;" and "&lt;samp&gt;" are both treated as code boxes
+function isCodeBox(htmlElement) {
+    let isCodeBox = false;
+    if (htmlElement.localName === `pre`) {
+        const children = htmlElement.children;
+        if (children &amp;&amp; children.length &gt; 0 &amp;&amp; children[0].localName === `code`) {
+            isCodeBox = true;
+        }
+    }
+    else if (htmlElement.localName === `samp`) {
+        isCodeBox = true;
+    }
+    if (DEBUG &amp;&amp; isCodeBox) console.log(`isCodeBox: ${htmlElement.localName} -&gt; ${isCodeBox}`);
+    return isCodeBox;
+}
+// The stepDescriptionSnippet.nextElement is a "flat" element (not a container and not a code box)
+// that needs to be added to the step content.
+// If there is a next sibling, this is recorded in the stepDescriptionSnippet by changing the nextElement property.
+function evaluateFlatElement(stepDescriptionSnippet, pattern) {
+    let stepDescription = stepDescriptionSnippet.stepDescription;
+    let listType = stepDescriptionSnippet.listType;
+    let currentElement = stepDescriptionSnippet.nextElement;
+    let nextSibling;
+    if (currentElement) {
+        if (pattern.stepListItemElementClasses.includes(currentElement.className)) {
+            if (listType.length === 0) {
+                // Start a list
+                listType = getListType(currentElement.textContent, pattern);
+                stepDescription += `&lt;${listType}&gt;`;
+            }
+            stepDescription += `&lt;li&gt;${sanitizeListItem(currentElement.textContent)}&lt;/li&gt;`;
+            nextSibling = currentElement.nextElementSibling;
+        }
+        else if (pattern.stepTextElementNames.includes(currentElement.localName)
+                || pattern.stepTextElementClasses.includes(currentElement.className)) {
+            if (listType.length &gt; 0) {
+                // Finish the list
+                stepDescription += `&lt;/${listType}&gt;`;
+                listType = ``;
+            }
+            const textContent = sanitizeString(currentElement.textContent);
+            if (textContent.length &gt; 0) {
+                // If there is no step title yet: use the textContent
+                if (stepDescriptionSnippet.stepTitle.length === 0) {
+                    stepDescriptionSnippet.stepTitle = textContent;
+                }
+                stepDescription += `&lt;p&gt;${textContent}&lt;/p&gt;`;
+            }
+            nextSibling = currentElement.nextElementSibling;
+        }
+        else if (pattern.stepListElementNames.includes(currentElement.localName)) {
+            // We get a complete list (ordered or unordered), just copy the complete html content
+            const sanitizedHTML = sanitizeHTML(currentElement.innerHTML, stepDescriptionSnippet.pageRoot);
+            stepDescription += `&lt;${currentElement.localName}&gt;${sanitizedHTML}&lt;/${currentElement.localName}&gt;`;
+            nextSibling = currentElement.nextElementSibling;
+        }
+        else if (currentElement.localName === `table`) {
+            const sanitizedTableContent = sanitizeTableContent(currentElement);
+            stepDescription += `&lt;figure class="table"&gt;${sanitizedTableContent}&lt;/figure&gt;`;
+            nextSibling = currentElement.nextElementSibling;
+        }
+        else if (pattern.stepIgnoreElementNames.includes(currentElement.localName)) {
+            if (DEBUG) console.log(`evaluateFlatElement ignore: ${currentElement.localName}`);
+            stepDescription += `&lt;p&gt;WARNING: Element "${currentElement.localName}" has been skipped when this runbook was created.&lt;/p&gt;`;
+            nextSibling = currentElement.nextElementSibling;
+        }
+        else {
+            nextSibling = null;
+        }
+        stepDescriptionSnippet.stepDescription = stepDescription;
+        stepDescriptionSnippet.listType = listType;
+        stepDescriptionSnippet.nextElement = nextSibling;
+        if (DEBUG) console.log(`evaluateFlatElement UPDATED: ${JSON.stringify(stepDescriptionSnippet, null, 4)}`);
+    }
+    else {
+        if (DEBUG) console.log(`evaluateFlatElement SKIP: currentElement is undefined`);
+    }
+}
+// evaluateCodeBox
+// - Parameter codeBoxElement may be either "pre" (followed by "code") or "samp"
+// - The innerHTML requires extra handling, because the RBA UI does not support &lt;span&gt; elements.
+//   The RBA UI just supports plain text with \n newline characters.
+// In many cases, this function creates more newlines than contained in the original page
+// (in case there should be multiple spans for a single line, as defined within the span-classes).
+// But there does not seem to be a generic solution for that problem, as we cannot simply predict
+// the span-classes and their meaning.
+function evaluateCodeBox(codeBoxElement, stepDescriptionSnippet) {
+    let codeBoxContent = ``;
+    let codeBoxWrapper = codeBoxElement;
+    if (codeBoxElement.localName === `pre`) {
+        // In this case, we have already verified that children[0] is a "code" element
+        codeBoxWrapper = codeBoxElement.children[0];
+    }
+    // else: codeBoxElement.localName === `samp`, and we do not need to skip the "code" element
+    const codeBoxContentElements = codeBoxWrapper.children;
+    for (let i = 0; i &lt; codeBoxContentElements.length; i++) {
+        const codeBoxContentElement = codeBoxContentElements[i];
+        codeBoxContent += codeBoxContentElement.textContent;
+        if (i &lt; codeBoxContentElements.length - 1) {
+            codeBoxContent += `&lt;CODE_BLOCK_NEWLINE&gt;`;
+        }
+    }
+    // Finally, ensure that we end up with a code block that the RBA UI understands
+    // Since "&lt;samp&gt;" will be converted to "&lt;pre&gt;&lt;code&gt;" anyway in sanitizeHTML(), we do not need to
+    // distinguish these cases here.
+    const sanitizedHTML = sanitizeHTML(`&lt;pre&gt;&lt;code&gt;${codeBoxContent}&lt;/pre&gt;&lt;/code&gt;`, stepDescriptionSnippet.pageRoot);
+    stepDescriptionSnippet.stepDescription += sanitizedHTML;
+    if (DEBUG) console.log(`evaluateCodeBox added: ${sanitizedHTML}`);
+}
+// Evaluate a container ("div") by further navigating into its children
+function evaluateContainer(containerElement, stepDescriptionSnippet, pattern) {
+    const containerChildren = containerElement.children;
+    for (let childNum = 0; childNum &lt; containerChildren.length; childNum++) {
+        const nextChild = containerChildren[childNum];
+        stepDescriptionSnippet.nextElement = nextChild;
+        if (DEBUG) console.log(`evaluateContainer nextChild (${childNum + 1}/${containerChildren.length}): ${nextChild.localName} (${nextChild.className})`);
+        if (pattern.stepContainerElementNames.includes(nextChild.localName)) {
+            // If a list has already been started, finish it now, before diving into the container
+            finishList(stepDescriptionSnippet);
+            // Recursively iterate over the children of this container
+            evaluateContainer(nextChild, stepDescriptionSnippet, pattern);
+        }
+        else if (isCodeBox(nextChild)) {
+            evaluateCodeBox(nextChild, stepDescriptionSnippet);
+        }
+        else {
+            evaluateFlatElement(stepDescriptionSnippet, pattern);
+        }
+    }
+    // If a list has been started, finish it now
+    finishList(stepDescriptionSnippet);
+}
+// This is a fallback to get text content for a step from its title, if no other text content could be found
+function extractTextContentOfParent(currentElement, stepTitle) {
+    let textContent = currentElement.parentElement.textContent;
+    // If possible, avoid to repeat the step title itself within the step description.
+    if (textContent &amp;&amp; textContent.startsWith(stepTitle)) {
+        textContent = textContent.substring(stepTitle.length);
+    }
+    if (DEBUG) console.log(`extractTextContentOfParent: ${textContent}`);
+    return textContent;
+}
+// Get all the runbook steps (according to the selected pattern) from the given bodyDocument
+function extractSteps(bodyDocument, pattern, link) {
+    const steps = [];
+    const stepTitleElements = Array.from(bodyDocument.querySelectorAll(pattern.stepTitleElementCSS));
+    if (DEBUG) console.log(`extractSteps: stepTitleCandidates = ${JSON.stringify(stepTitleElements.map(el =&gt; el.textContent))}`);
+    for (let stepNum = 0; stepNum &lt; stepTitleElements.length; stepNum++) {
+        const stepTitleElement = stepTitleElements[stepNum];
+        const stepTitle = stepTitleElement.textContent;
+        let stepDescriptionSnippet = createStepDescriptionSnippet(link.getPageRoot());
+        stepDescriptionSnippet.stepTitle = stepTitle;
+        if (pattern.stepTitleInSeparateContainer === true) {
+            // For example, this can be necessary for IBM Documentation articles: The step title is
+            // buried inside a container, and we have to step back to its parent to find the step
+            // description.
+            const stepTitleParent = stepTitleElement.parentElement;
+            stepDescriptionSnippet.nextElement = stepTitleParent.nextElementSibling;
+        }
+        else {
+            stepDescriptionSnippet.nextElement = stepTitleElement.nextElementSibling;
+        }
+        while (stepDescriptionSnippet.nextElement) {
+            let nextElement = stepDescriptionSnippet.nextElement;
+            if (DEBUG) {
+                let elementText = nextElement.textContent;
+                // If needed, shorten the elementText and remove some whitespace:
+                // this is just to give an idea which element we are looking at
+                elementText = shortenString(elementText, 40);
+                elementText = sanitizeString(elementText);
+                console.log(`extractSteps nextElement: ${nextElement.localName} (${nextElement.className}): ${elementText}`);
+            }
+            if (pattern.stepContainerElementNames.includes(nextElement.localName)) {
+                // If a list has already been started, finish it now, before diving into the container
+                finishList(stepDescriptionSnippet);
+                // Remember the next sibling of the container (if any)
+                const nextSibling = nextElement.nextElementSibling;
+                // Iterate over the children of this container
+                evaluateContainer(nextElement, stepDescriptionSnippet, pattern);
+                stepDescriptionSnippet.nextElement = nextSibling;
+            }
+            else if (isCodeBox(nextElement)) {
+                evaluateCodeBox(nextElement, stepDescriptionSnippet);
+                stepDescriptionSnippet.nextElement = nextElement.nextElementSibling;
+            }
+            else {
+                evaluateFlatElement(stepDescriptionSnippet, pattern);
+            }
+        }
+        // Fallback (currently limited to IBM Documentation, i.e., stepTitleInSeparateContainer === true):
+        // If we could not find any step content (i.e., stepDescriptionSnippet.stepDescription is still empty), then
+        // try to get the textContent of the parent or even the grand-parent of the title element.
+        // If possible, avoid to repeat the step title itself within the step description.
+        if (stepDescriptionSnippet.stepDescription.length === 0 &amp;&amp; pattern.stepTitleInSeparateContainer === true) {
+            let stepTextContent = extractTextContentOfParent(stepTitleElement, stepTitle);
+            if (stepTextContent.length === 0 || stepTextContent === stepTitle) {
+                stepTextContent = extractTextContentOfParent(stepTitleElement.parentElement, stepTitle);
+            }
+            stepDescriptionSnippet.stepDescription = stepTextContent;
+        }
+        finishStep(stepDescriptionSnippet, steps);
+    }
+    return steps;
+}
+// Get the description for the complete runbook (not for an individual step).
+// Note: This description will be modified later to include the link to the source document,
+// and to stay within the limit of 300 characters for the description.
+function extractDescription(startElement, pattern) {
+    if (DEBUG) console.log(`extractDescription ENTRY: ${startElement ? startElement.localName : `null`}`);
+    let description = ``;
+    let nextSibling = startElement;
+    while (nextSibling) {
+        let nextDescriptionSnippet = ``;
+        if ((pattern.descriptionElementNames.includes(nextSibling.localName) &amp;&amp; nextSibling.className.length === 0)
+            || pattern.descriptionElementClasses.includes(nextSibling.className)) {
+            nextDescriptionSnippet = nextSibling.textContent;
+            nextSibling = nextSibling.nextElementSibling;
+        }
+        // Navigate into div-container only if we did not find anything yet
+        else if (description.length === 0 &amp;&amp; nextSibling.localName === `div`) {
+            const containerChildren = nextSibling.children;
+            for (let i = 0; i &lt; containerChildren.length; i++) {
+                const childElement = containerChildren[i];
+                nextDescriptionSnippet = extractDescription(childElement, pattern);
+                if (nextDescriptionSnippet.length &gt; 0) {
+                    // Stop if we have found something
+                    break;
+                }
+            }
+            // Stop if we have found something
+            nextSibling = (nextDescriptionSnippet.length &gt; 0) ? null : nextSibling.nextElementSibling;
+        }
+        else {
+            nextSibling = null;
+        }
+        if (nextDescriptionSnippet.length &gt; 0) {
+            if (description.length &gt; 0) {
+                description += ` `;
+            }
+            description += nextDescriptionSnippet;
+        }
+    }
+    description = sanitizeString(description);
+    if (DEBUG) console.log(`extractDescription RETURN: ${description}`);
+    return description;
+}
+// Get the tags for the runbook, including the default tags.
+function extractTags(bodyDocument, pattern) {
+    const tags = getDefaultTags();
+    const tagAttributeNames = pattern.tagMetaAttributeNames;
+    const metas = bodyDocument.getElementsByTagName(`meta`);
+    for (let i = 0; i &lt; metas.length; i++) {
+        const metaElement = metas[i];
+        if (metaElement.getAttribute(`name`)) {
+            if (tagAttributeNames.includes(metaElement.getAttribute(`name`).toLowerCase())) {
+                const content = metaElement.getAttribute(`content`);
+                content.split(`,`).forEach((keyword) =&gt; { addToTags(keyword, tags); });
+            }
+        }
+    }
+    return tags;
+}
+// Get the image names from the source document
+function extractImageNames(bodyDocument) {
+    let imageNames = [];
+    const images = Array.from(bodyDocument.querySelectorAll(`img`));
+    for (let i = 0; i &lt; images.length; i++) {
+        const imageName = images[i].getAttribute(`src`);
+        if (imageName) {
+            imageNames.push(imageName);
+        }
+    }
+    return imageNames;
+}
+// Entry point to try to convert the given bodyDocument to a runbook, and add it to runbooks.
+function convertToRunbook(bodyDocument, link, linkUrlsChecked, titleList, runbooks) {
+    let title = ``;
+    let description = ``;
+    let steps = [];
+    let tags;
+    // Find out which pattern to use: Take first pattern that yields a title and some steps
+    for (let patternIndex = 0; patternIndex &lt; RUNBOOK_PATTERNS.length; patternIndex++) {
+        const pattern = RUNBOOK_PATTERNS[patternIndex];
+        const titleElementCandidates = Array.from(bodyDocument.querySelectorAll(pattern.titleElementCSS));
+        if (DEBUG) console.log(`convertToRunbook [pattern ${patternIndex}]: ${link.url} -&gt; titleElementCandidates = ${JSON.stringify(titleElementCandidates.map(el =&gt; el.textContent))}`);
+        for (let titleCandidateIndex = 0; titleCandidateIndex &lt; titleElementCandidates.length; titleCandidateIndex++) {
+            const titleElementCandidate = titleElementCandidates[titleCandidateIndex];
+            title = sanitizeString(titleElementCandidate.textContent);
+            if (isTitleAccepted(title, pattern)) {
+                if (DEBUG) console.log(`convertToRunbook [pattern ${patternIndex}]: try ${link.url} (title candidate = ${title})`);
+                steps = extractSteps(bodyDocument, pattern, link);
+                if (steps.length &gt; 0) {
+                    // Found the right pattern that yields some steps... now get the description as well,
+                    // from the next sibling of the title candidate
+                    description = extractDescription(titleElementCandidate.nextElementSibling, pattern);
+                    tags = extractTags(bodyDocument, pattern);
+                    break;
+                }
+            }
+            else {
+                if (DEBUG) console.log(`convertToRunbook [pattern ${patternIndex}]: title candidate not accepted: ${title}`);
+            }
+        }
+        if (steps.length &gt; 0) break;
+    }
+    if (title &amp;&amp; tags &amp;&amp; steps.length &gt; 0 &amp;&amp; !titleList.includes(title)) {
+        const imageNames = extractImageNames(bodyDocument);
+        runbooks.push(new Runbook(title, description, tags, steps, link, imageNames));
+        titleList.push(title);
+    }
+    else {
+        if (DEBUG) console.log(`convertToRunbook: IGNORE ${title}::${description}::${steps.length}`);
+    }
+    linkUrlsChecked.push(link.url);
+}
+module.exports = {
+    convertToRunbook
+};
+</code></pre>

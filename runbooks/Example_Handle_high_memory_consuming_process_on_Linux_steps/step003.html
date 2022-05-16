@@ -1,0 +1,6 @@
+<p>Run the following command to display the ten processes consuming the most memory:</p>
+<p>&nbsp;</p>
+<section class="rba-command"><span class="rba-command-text">ps -eo %mem,pid,comm | sort -nr | head -n 10</span></section>
+<p>&nbsp;</p>
+<p>The result will display the memory utilization in the first column. Identify all processes with a too high memory utilization, go back to your runbook parameters and change the PROCESS_ID parameter to the number identified by the second column.</p>
+<p>If there are no processes appearing in this list with a high memory utilization, <span class="rba-goto" data-id="end"></span>this runbook.</p>

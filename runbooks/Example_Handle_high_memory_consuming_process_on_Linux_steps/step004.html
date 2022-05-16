@@ -1,0 +1,9 @@
+<p>Run the following command to attempt to gracefully stop the process:</p>
+<p>&nbsp;</p>
+<section class="rba-command"><span class="rba-command-text">kill -HUP<span class="rba-parameter" data-id="PROCESSID"></span></span></section>
+<p>&nbsp;</p>
+<p>Wait for a few seconds, then run the following command to check that the process has ended accordingly:</p>
+<p>&nbsp;</p>
+<section class="rba-command"><span class="rba-command-text">ps -ef | grep&nbsp;<span class="rba-parameter" data-id="PROCESSID"></span> | grep -v grep</span></section>
+<p>&nbsp;</p>
+<p>Repeat this step for the remaining processes identified. If the output for all processes is empty <span class="rba-goto" data-id="end"></span>this runbook. If at least process is still running, proceed to the next step.</p>

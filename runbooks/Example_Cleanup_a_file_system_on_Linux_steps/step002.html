@@ -1,0 +1,6 @@
+<p>Run the following command:</p>
+<p>&nbsp;</p>
+<section class="rba-command"><span class="rba-command-text">df -k</span></section>
+<p>&nbsp;</p>
+<p>The sample output shows <span class="rba-parameter" data-id="FILESYSTEM"></span>to be completely full:</p>
+<p>Filesystem&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1K-blocks&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Used Available Use% Mounted on<br>/dev/mapper/system-root&nbsp; 15320532&nbsp; 10744612&nbsp;&nbsp; 3797680&nbsp; 74% /<br>/dev/mapper/appvg-apps&nbsp;&nbsp; 61923324 &nbsp;61923324&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0 100% /opt<br>/dev/sda1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 154691&nbsp;&nbsp;&nbsp;&nbsp; 37620&nbsp;&nbsp;&nbsp; 109084&nbsp; 26% /boot<br><br>In this sample output, the file system "/opt" has no space left. Identify the file systems with a high value in the Use% column or a low value in the Available column.</p>

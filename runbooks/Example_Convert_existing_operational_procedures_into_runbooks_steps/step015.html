@@ -1,0 +1,11 @@
+<h3>Regular connectivity test</h3>
+<p>To verify the correctness of the values of the CURL_AUTHENTICATION and CURL_BASEURL parameters, run the command</p>
+<section class="rba-command"><span class="rba-command-text">curl -X GET -k&nbsp;<span class="rba-parameter" data-id="CURL_AUTHENTICATION"></span> "<span class="rba-parameter" data-id="CURL_BASEURL"></span>/status"</span></section>
+<p>&nbsp;</p>
+<p>&nbsp;This command is expected to print some informational data about the speed of the transfer along with some JSON result data similar to this:</p><pre><code class="language-plaintext">{"rbs":0,"as":0,"db":0,"connection":{"AWX":0,"BIGFIX":2,"IMPACT":2,"SCRIPT":0},"errors":[]}</code></pre>
+<p>Note that some of the connection items may have a different value than "0", and the "errors" array within the JSON result data might be nonempty (if the connection is in a failed state) - this is not a problem in the context of this runbook.</p>
+<p>&nbsp;</p>
+<h3>Connectivity test with more debug data (use only if needed)</h3>
+<p>If no data or completely different data are printed by the previous command (e.g., some HTML content), then verify if the parameter values have been specified correctly. If the messages provided by the command are not sufficient, you can also add the "-v" option to debug the command:</p>
+<section class="rba-command"><span class="rba-command-text">curl -X GET -v -k&nbsp;<span class="rba-parameter" data-id="CURL_AUTHENTICATION"></span> "<span class="rba-parameter" data-id="CURL_BASEURL"></span>/status"</span></section>
+<p>Adjust the parameter values as needed, until the command works as expected.</p>

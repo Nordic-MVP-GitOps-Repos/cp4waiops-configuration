@@ -1,0 +1,9 @@
+<p>If you have reached this step of the runbook, the process is most likely out of control and needs to be stopped by force. Any data held in memory or data not yet written will be lost.&nbsp;Run the following command to force the process to stop:</p>
+<p>&nbsp;</p>
+<section class="rba-command"><span class="rba-command-text">kill -KILL<span class="rba-parameter" data-id="PROCESSID"></span></span></section>
+<p>&nbsp;</p>
+<p>Wait for a few seconds, then run the following command to check that the process has ended accordingly:</p>
+<p>&nbsp;</p>
+<section class="rba-command"><span class="rba-command-text">ps -ef | grep <span class="rba-parameter" data-id="PROCESSID"></span>| grep -v grep</span></section>
+<p>&nbsp;</p>
+<p>Repeat this step for the remaining processes identified. If the output for all processes is empty&nbsp;<span class="rba-goto" data-id="end"></span>the runbook. If at least one process is still running continue with the next step.</p>

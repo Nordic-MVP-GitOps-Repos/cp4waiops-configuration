@@ -1,0 +1,19 @@
+<p>Check (and if necessary, update) the values for all parameters.</p>
+<ul>
+  <li>The values of SOURCE_RBAHOST and TARGET_RBAHOST depend on the types of the source and target RBA deployments:<ul>
+      <li>For RBA Private Deployment: The XX_RBAHOST is the location where the RBA service is running (which may be different from the location where the Netcool OMNIbus/DASH UI server is running) and has the format &lt;fullyQualifiedDomainName&gt;:&lt;rba-rbs-port&gt;, for example, myhost.mycomp.com:3005</li>
+      <li>For RBA within Cloud Event Management on IBM Marketplace: The XX_RBAHOST is for example rba.us-south.cloudeventmanagement.cloud.ibm.com</li>
+      <li>For RBA within Netcool Operations Insight running on Red Hat OpenShift: Then XX_RBAHOST is the location where the NOI service is running, for example, netcool.n163.apps.mycluster.mycompany.com</li>
+      <li>For the complete list of supported deployments and related notes, see the <a target="_blank" rel="noopener noreferrer" href="https://www.ibm.com/docs/en/runbook-automation?topic=runbook-automation-api">runbook API</a> documentation.</li>
+    </ul>
+  </li>
+  <li>The values of SOURCE_APIKEY and TARGET_APIKEY have the format &lt;apiKeyName&gt;:&lt;apiKeyPassword&gt;, for example, ld/abcd:cd+ef.<ul>
+      <li>If you do not yet have API keys for the source and target RBA API endpoints, you need to create them first.</li>
+      <li>You need to have the administrative role (e.g., RBA manager) to create API keys.</li>
+      <li>For RBA Private Deployment: Navigate to the "API keys" page.</li>
+      <li>For RBA within Cloud Event Management on IBM Marketplace: See <a target="_blank" rel="noopener noreferrer" href="https://www.ibm.com/docs/en/runbook-automation?topic=api-keys">API Keys</a>.</li>
+      <li>For RBA within Netcool Operations Insight running on Red Hat OpenShift: Navigate to "Administration &gt; Integration with other systems" and switch to the "API keys" tab.</li>
+      <li>For more information, see <a target="_blank" rel="noopener noreferrer" href="https://www.ibm.com/docs/en/runbook-automation?topic=api-keys">API Keys</a>.</li>
+    </ul>
+  </li>
+</ul>

@@ -1,0 +1,60 @@
+{
+  "name": "Example: Resolve CNEA data flow issues",
+  "description": "Investigate, debug, and resolve data flow issues concerning CNEA.",
+  "steps": [
+    {
+      "number": 1,
+      "title": "CNEA gateway & Ingestion service",
+      "type": "manual",
+      "description": "Exported into step001.html"
+    },
+    {
+      "number": 2,
+      "title": "ASM status checks",
+      "type": "manual",
+      "description": "Exported into step002.html"
+    },
+    {
+      "number": 3,
+      "title": "Normalizer checks",
+      "type": "manual",
+      "description": "Exported into step003.html"
+    },
+    {
+      "number": 4,
+      "title": "Inference checks",
+      "type": "manual",
+      "description": "Exported into step004.html"
+    },
+    {
+      "number": 5,
+      "title": "AGG Dedup / Collator / Normalizer checks",
+      "type": "manual",
+      "description": "Exported into step005.html"
+    },
+    {
+      "number": 6,
+      "title": "Actions",
+      "type": "manual",
+      "description": "Exported into step006.html"
+    }
+  ],
+  "parameters": [
+    {
+      "name": "releaseName",
+      "type": "string",
+      "minLength": 1,
+      "default": "netcool"
+    }
+  ],
+  "tags": [
+    "cnea",
+    "kubernetes",
+    "asm",
+    "kafka",
+    "openshift",
+    "sample"
+  ],
+  "_runbookId": "57867803-3516-486e-8b40-87aa08c333fd",
+  "automations": {}
+}

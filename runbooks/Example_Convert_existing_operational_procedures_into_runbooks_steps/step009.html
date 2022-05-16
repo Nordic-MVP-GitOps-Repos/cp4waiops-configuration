@@ -1,0 +1,120 @@
+<pre><code class="language-plaintext">/*
+ * Runbook.js
+ * Data conversion tool for runbooks (RBA).
+ * This tool converts HTML sources (website or local files)
+ * into runbooks in the RBA import format.
+ * Requires: node (node.js runtime)
+ * Version: 1
+ * Date: 2022-02-04
+ * Author: IBM
+ * © Copyright IBM Corp. 2021, 2022  All Rights Reserved.
+ * Use as is - no support
+ */
+const { RUNBOOK_DISCLAIMER_STEP, SOURCE_REFERENCE_STRING, ROOT_URL, RUNBOOK_NAME_SUFFIX } = require(`./config.js`);
+const { sanitizeString, shortenString } = require(`./utils.js`);
+class Runbook {
+    constructor(name, description, tags, steps, link, imageNames) {
+        // If the link.url has been redirected to a new page link.responseUrl, store the link.responesUrl in the runbook
+        const linkUrl = (link.responseUrl &amp;&amp; link.responseUrl.length &gt; 0) ? link.responseUrl : link.url;
+        this.name = `${name}${RUNBOOK_NAME_SUFFIX}`;
+        this.description = buildDescription(description, linkUrl);
+        this.steps = [];
+        let stepNum = 0;
+        // Insert optional generic step as hint that the runbook has been generated,
+        // and has not yet been validated
+        if (RUNBOOK_DISCLAIMER_STEP.includeStep === true) {
+            const isWeb = (ROOT_URL.startsWith(`http://`) || ROOT_URL.startsWith(`https://`));
+            const linkHtml = isWeb ? `&lt;a target="_blank" rel="noopener noreferrer" href="${linkUrl}"&gt;${linkUrl}&lt;/a&gt;` : linkUrl;
+            let stepDescr = RUNBOOK_DISCLAIMER_STEP.stepDescription.replace(`$$SOURCE$$`, linkHtml);
+            // If needed, add a section that includes the names of all images from the source document
+            if (RUNBOOK_DISCLAIMER_STEP.includeListOfImages === true &amp;&amp; imageNames &amp;&amp; imageNames.length &gt; 0) {
+                // Convert the array imageNames to an unordered list
+                let imageNameList = `&lt;ul&gt;`;
+                for (let i = 0; i &lt; imageNames.length; i++) {
+                    imageNameList += `&lt;li&gt;${imageNames[i]}&lt;/li&gt;`;
+                }
+                imageNameList += `&lt;/ul&gt;`;
+                let imagesDescr = RUNBOOK_DISCLAIMER_STEP.stepDescriptionImages.replace(`$$SOURCE_NUM_IMAGES$$`, imageNames.length);
+                imagesDescr = imagesDescr.replace(`$$SOURCE_IMAGES_LIST$$`, imageNameList);
+                stepDescr += `&lt;br&gt;${imagesDescr}`;
+            }
+            this.steps.push({
+                number: stepNum += 1,
+                title: RUNBOOK_DISCLAIMER_STEP.stepTitle,
+                description: sanitizeString(stepDescr),
+                type: `manual`
+            });
+        }
+        steps.forEach((step) =&gt; {
+            if (typeof step === `string`) {
+                this.steps.push({
+                    number: stepNum += 1,
+                    title: shortenStepTitle(step),
+                    description: step,
+                    type: `manual`
+                });
+            }
+            else {
+                if (step.description.length === 0) {
+                    step.description = step.title;
+                }
+                step.title = shortenStepTitle(step.title);
+                step.number = stepNum += 1;
+                this.steps.push(step);
+            }
+        });
+        this.tags = [];
+        tags.forEach((tag) =&gt; {
+            const trimmedTag = tag.trim();
+            this.tags.push(trimmedTag.length &gt; 30 ? trimmedTag.substring(0, 30).trim() : trimmedTag);
+        });
+    }
+}
+function shortenStepTitle(rawStepTitle) {
+    // The maximum length for the step title has been proven to be a good guess (may be modified)
+    const MAX_STEP_TITLE_LEN = 180;
+    let stepTitle = rawStepTitle;
+    const paragraphStartIndex = rawStepTitle.indexOf(`&lt;p&gt;`) + 3;
+    const paragraphStopIndex = rawStepTitle.indexOf(`&lt;/p&gt;`);
+    if (paragraphStartIndex &gt; -1 &amp;&amp; paragraphStopIndex &gt; paragraphStartIndex) {
+        stepTitle = rawStepTitle.substring(paragraphStartIndex, paragraphStopIndex);
+    }
+    stepTitle = shortenString(stepTitle, MAX_STEP_TITLE_LEN);
+    return stepTitle;
+}
+function buildDescription(rawDescription, linkUrl) {
+    // The total length of the runbook description must be 300 characters or less.
+    const MAX_TOTAL_DESC_LEN = 300;
+    // In any case, we want to include the linkUrl at the end of the description
+    const LINK_STRING = `${SOURCE_REFERENCE_STRING}: ${linkUrl}`;
+    const TOTAL_LINK_LEN = 3 + LINK_STRING.length;
+    const MAX_RAW_DESC_LEN = MAX_TOTAL_DESC_LEN - TOTAL_LINK_LEN;
+    let description = ``;
+    if (MAX_TOTAL_DESC_LEN &gt; TOTAL_LINK_LEN) {
+        if (rawDescription.length &lt;= MAX_RAW_DESC_LEN) {
+            if (rawDescription.length === 0) {
+                description = LINK_STRING;
+            }
+            else {
+                description = `${rawDescription} - ${LINK_STRING}`;
+            }
+        }
+        else {
+            description = `${rawDescription.substring(0, MAX_RAW_DESC_LEN - 1)}... ${LINK_STRING}`;
+        }
+    }
+    else {
+        // Very unlikely to occur... incredibly long linkUrl / LINK_STRING
+        if (LINK_STRING.length &gt; MAX_TOTAL_DESC_LEN) {
+            description = shortenString(LINK_STRING, MAX_TOTAL_DESC_LEN);
+        }
+        else {
+            description = LINK_STRING;
+        }
+    }
+    return description;
+}
+module.exports = {
+    Runbook
+};
+</code></pre>

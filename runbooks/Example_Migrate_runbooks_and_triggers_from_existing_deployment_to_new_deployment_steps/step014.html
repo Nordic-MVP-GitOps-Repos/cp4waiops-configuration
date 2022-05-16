@@ -1,0 +1,4 @@
+<p>If you have defined triggers within the target Impact deployment already&nbsp;then it is recommended to create a backup copy of these triggers before you start the migration.</p>
+<p>Run the command</p>
+<section class="rba-command"><span class="rba-command-text">curl -X GET -k -s -u "<span class="rba-parameter" data-id="TARGET_APIKEY"></span>" "https://<span class="rba-parameter" data-id="TARGET_RBAHOST"></span>/api/v1/rba/triggers" &gt; triggersBeforeMigration.backup.json</span></section>
+<p>Browse the backup file and verify that it contains trigger data.</p>

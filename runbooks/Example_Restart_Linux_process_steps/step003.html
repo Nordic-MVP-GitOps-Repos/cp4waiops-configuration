@@ -1,0 +1,6 @@
+<p>Run the command below to determine whether the process is still running:</p>
+<p>&nbsp;</p>
+<section class="rba-command"><span class="rba-command-text">ps -eo args | grep -E "<span class="rba-parameter" data-id="PROCESSNAME"></span>( .*|$)" | grep -v grep</span></section>
+<p>&nbsp;</p>
+<p>If the result returned contains a line with the processname <span class="rba-parameter" data-id="PROCESSNAME"></span>plus any optional additional information then the process is still running. Go to the <span class="rba-goto" data-id="end"></span>of this runbook.</p>
+<p>If the command didn't return a result the process is no longer running.</p>

@@ -1,0 +1,43 @@
+<pre><code class="language-plaintext">/*
+ * transformTriggers.js
+ * Transformation tool for runbooks (RBA).
+ * This tool transforms a list of triggers that have been exported previously
+ * from some RBA deployment (and stored within a single file) into separate
+ * files, each containing a single trigger in the format that can be used to
+ * create the trigger in another RBA deployment in a subsequent step.
+ * Requires: node (node.js runtime)
+ * Version: 1
+ * Date: 2022-02-04
+ * Author: IBM
+ * © Copyright IBM Corp. 2021, 2022  All Rights Reserved.
+ * Use as is - no support
+ */
+/* eslint-disable no-console */
+const { readAndParseFile, recreateDirectory, saveObjectToFile } = require(`./utils`);
+const TRIGGERS_DIRECTORY = `./triggers`;
+// ****************************  MAIN  ****************************
+// Read command parameter: file name
+const exportedTriggersFileName = process.argv[2];
+if (typeof exportedTriggersFileName === `undefined`) {
+    console.log(`ERROR: Mandatory parameter &lt;exportedTriggersFileName&gt; missing`);
+    console.log(`Usage: node transformTriggers.js &lt;exportedTriggersFileName&gt;`);
+    process.exit(1);
+}
+// Get the exported triggers from the file
+const triggers = readAndParseFile(exportedTriggersFileName);
+// No error so far, so we can assume transforming and storing the triggers will work
+// Delete the target directory, so we avoid collisions with triggers from a previous run of this tool
+recreateDirectory(TRIGGERS_DIRECTORY);
+for (let i = 0; i &lt; triggers.length; i++) {
+    const trigger = triggers[i];
+    const triggerId = trigger.id;
+    // Remove the trigger ID and the runbookName properties, because they are not a supported when creating a trigger
+    delete trigger.id;
+    delete trigger.runbookName;
+    // Store each trigger individually
+    const triggerFilePath = `${TRIGGERS_DIRECTORY}/trigger.${triggerId}.json`;
+    saveObjectToFile(trigger, triggerFilePath);
+}
+console.log(`SUCCESS: Created ${triggers.length} trigger files in directory ${TRIGGERS_DIRECTORY}`);
+process.exit(0);
+</code></pre>

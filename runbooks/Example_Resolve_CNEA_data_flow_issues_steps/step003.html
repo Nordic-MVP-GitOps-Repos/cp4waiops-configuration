@@ -1,0 +1,10 @@
+<p>Check whether the ea-asm-enriched-events topic is populated:
+<section class="rba-command"><span class="rba-command-text">oc exec -ti <span class="rba-parameter" data-id="releaseName"></span>-kafka-0 -- ../../opt/kafka/bin/kafka-console-consumer.sh --from-beginning --bootstrap-server localhost:9092 --topic ea-asm-enriched-events</span></section>
+</p>
+<p>If no enriched entries are present check the asm-normalizer logs:</p>
+<p>
+<section class="rba-command"><span class="rba-command-text">oc logs $(kubectl get po | grep asm-normalizer | awk '{print $1}')</span></section>
+<p>If necessary restart the asm-normalizer pod otherwise proceed.</p>
+<p>
+<section class="rba-command"><span class="rba-command-text">oc delete pod $(kubectl get po | grep asm-normalizer | awk '{print $1}')</span></section>
+</p>

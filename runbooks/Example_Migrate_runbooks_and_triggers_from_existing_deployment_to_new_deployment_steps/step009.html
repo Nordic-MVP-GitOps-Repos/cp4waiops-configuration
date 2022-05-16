@@ -1,0 +1,9 @@
+<p>The next steps provide two Node.js tools that assists you</p>
+<ul>
+  <li>in evaluating if there are differences between "exportedRunbooks.json" and "importedRunbooks.json"</li>
+  <li>in transforming the "exportedTriggers.json" file (that will be created later) into individual files that contain a single trigger that can be created in the target RBA/Impact deployment.</li>
+</ul>
+<p>The second tool is needed because there is no RBA API call that accepts the "exportedTriggers.json" file for bulk creation of triggers. Instead, each trigger needs to be created individually. In addition, some of the trigger properties that are included in each of the triggers in "exportedTriggers.json" must not exist when creating a trigger. In particular, the trigger ID must be removed. A new trigger ID will be assigned when you create the trigger in the target RBA/Impact deployment.</p>
+<p>Create three files</p>
+<section class="rba-command"><span class="rba-command-text">touch checkForMissingRunbooks.js; touch transformTriggers.js; touch utils.js</span></section>
+<p>&nbsp;and copy-paste the content of the next three steps into the respective files.</p>

@@ -1,0 +1,31 @@
+<p>The steps of this runbook require you to access the public runbook REST API interface of the source deployment where you want to export the runbooks from. To authenticate your requests, you need an API key. As the API key password will be visible in the execution record of this runbook you will be instructed to delete or recreate the API key in the last step of this runbook.</p>
+<p>Open a command shell that supports the "curl" command. For the subsequent steps, you also need to have network connectivity to&nbsp;the host name part of&nbsp;<span class="rba-parameter" data-id="SOURCE_BASEURL"></span> from this command shell.</p>
+<p>&nbsp;</p>
+<h3>Instructions for IBM Cloud Pak for Watson AIOps as the source</h3>
+<ul>
+  <li>The command shell needs to support the "base64" encoding tool (in addition to the requirements listed above).</li>
+  <li>Generate a new API key. If you have performed this step before, you do not need to regenerate the key, you can use the existing API key value.<ul>
+      <li>In the IBM Cloud Pak for Watson AIOps user interface expand the user menu and open the menu item "Profile and settings" in a new browser tab.</li>
+      <li>On the "Profile and settings" details page click "API key &gt; Generate new key". Copy the API key value (&lt;api_key_value&gt;) and save it. If you lose the API key value, you need to regenerate it as it cannot be retrieved again. (But as indicated above, you should regenerate your API key once you are done with this runbook.)</li>
+      <li>You can close the browser tab with the "Profile and settings" details page.</li>
+    </ul>
+  </li>
+  <li>Use the command shell to encode the combined &lt;username&gt; and &lt;api_key_value&gt; (separated by a colon ":" character) to generate a ZenApiKey token, where &lt;username&gt; is the user id that you used to login to the IBM Cloud Pak for Watson AIOps user interface:</li>
+</ul>
+<section class="rba-command"><span class="rba-command-text">echo "&lt;username&gt;:&lt;api_key_value&gt;" | base64 -w 0 | echo "-H \"Authorization: ZenApiKey $(cat -)\""</span></section>
+<ul>
+  <li>The result string should look like this: <i><strong>-H "Authorization: ZenApiKey *******"</strong></i></li>
+  <li>Edit the runbook parameter SOURCE_AUTHENTICATION. Copy the result string from the previous command and paste it as the parameter value of SOURCE_AUTHENTICATION.</li>
+  <li>Once you have set the value click "Update parameters".</li>
+</ul>
+<p>&nbsp;</p>
+<h3>Instructions for deployments other than IBM Cloud Pak for Watson AIOps as the source</h3>
+<ol>
+  <li>Open a new browser tab.</li>
+  <li>Login to the product UI and navigate to the API key management page.</li>
+  <li>Create a new API key and note the API key name (&lt;api_key_name&gt;), description, and password (&lt;api_key_password&gt;). If you lose the password, you need to create another API key as it cannot be retrieved again.</li>
+  <li>Edit the runbook parameter value SOURCE_AUTHENTICATION and save the value [<i><strong>-u "&lt;api_key_name&gt;:&lt;api_key_password&gt;"</strong></i>] (without the brackets)</li>
+  <li>Once you have set the value click "Update parameters".</li>
+  <li>For more information, see the product documentation on API keys at <a target="_blank" rel="noopener noreferrer" href="https://www.ibm.com/docs/en/runbook-automation?topic=api-keys">IBM&nbsp;Documentation</a>.</li>
+</ol>
+<p>&nbsp;</p>

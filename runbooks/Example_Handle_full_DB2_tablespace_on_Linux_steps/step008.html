@@ -1,0 +1,9 @@
+<p>Run the following command to check the new size in bytes of the tablespace:</p>
+<p>&nbsp;</p>
+<section class="rba-command"><span class="rba-command-text">db2 "select TBSP_ID As \"ID\",TBSP_TOTAL_SIZE_KB * TBSP_TOTAL_PAGES As \"Tablespace size in bytes\" from SYSIBMADM.TBSP_UTILIZATION WHERE TBSP_NAME = '<span class="rba-parameter" data-id="TABLESPACE_NAME"></span>' and TBSP_STATE='NORMAL' and TBSP_TYPE='DMS'"</span></section>
+<p>&nbsp;</p>
+<p>The result should display the tablespace ID and the size of the tablespace, similar to the example below:</p><pre><code class="language-plaintext">db2inst1@db2server:~&gt; db2 "select TBSP_ID As (…)"
+ID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Tablespace size in bytes
+------------------------ ------------------------
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 7&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 36909875</code></pre>
+<p>Should this not be the case escalate to the next support level and provide the information gathered in the steps above.</p>

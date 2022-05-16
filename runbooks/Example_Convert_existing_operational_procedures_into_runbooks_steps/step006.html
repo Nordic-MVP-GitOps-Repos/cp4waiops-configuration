@@ -1,0 +1,78 @@
+<pre><code class="language-plaintext">/*
+ * Link.js
+ * Data conversion tool for runbooks (RBA).
+ * This tool converts HTML sources (website or local files)
+ * into runbooks in the RBA import format.
+ * Requires: node (node.js runtime)
+ * Version: 1
+ * Date: 2022-03-01
+ * Author: IBM
+ * © Copyright IBM Corp. 2021, 2022  All Rights Reserved.
+ * Use as is - no support
+ */
+/* eslint-disable no-console */
+const { LINK_ROOT_URL } = require(`./config.js`);
+class Link {
+    constructor(url, name) {
+        this.url = url;
+        this.responseUrl = ``;
+        this.pageRoot = ``;
+        this.bodyHtml = ``;
+        this.name = name || `Unnamed runbook link`;
+    }
+    // The pageRoot is the responseUrl without the very last path section (file).
+    // The pageRoot is needed for building the absolute URL based on a relative URL (href) found on a page.
+    // Perform lazy initialization of the pageRoot attribute.
+    // The check for "?topic=" is specific to the migration of the IBM Knowledge Center to IBM Documentation.
+    // If no meaningful pageRoot can be found (e.g., working on local files and not crawling a web site),
+    // then it defaults to the LINK_ROOT_URL.
+    getPageRoot() {
+        if (this.pageRoot.length === 0 &amp;&amp; this.responseUrl.length &gt; 0) {
+            const lastForwardSlashIndex = this.responseUrl.lastIndexOf(`/`);
+            const topicQueryIndex = this.responseUrl.indexOf(`?topic=`);
+            if (topicQueryIndex &gt; 0) {
+                // There is a "topic" query, so check if the last forward slash exists after that query
+                if (lastForwardSlashIndex &gt; topicQueryIndex) {
+                    this.pageRoot = this.responseUrl.substring(0, lastForwardSlashIndex);
+                }
+                // Otherwise: use the fallback
+            }
+            else {
+                // There is no "topic" query, so start at the last forward slash
+                this.pageRoot = this.responseUrl.substring(0, lastForwardSlashIndex);
+            }
+        }
+        // Fallback: Use LINK_ROOT_URL
+        if (this.pageRoot.length === 0) {
+            this.pageRoot = LINK_ROOT_URL;
+        }
+        return this.pageRoot;
+    }
+}
+// Convert the given HTML linkElement to a link with an absolute URL
+function linkFromHTML(linkElement) {
+    let newUrl = linkElement.href;
+    // Ignore the hash part of the URL
+    newUrl = newUrl.replace(/#.*/, ``);
+    // Replace relative URL with absolute URL, based on the LINK_ROOT_URL
+    if (!newUrl.startsWith(`http`)) {
+        if (newUrl.startsWith(`/`)) {
+            newUrl = `${LINK_ROOT_URL}${newUrl}`;
+        }
+        else {
+            newUrl = `${LINK_ROOT_URL}/${newUrl}`;
+        }
+    }
+    // Eliminate changing to the parent directory, which may bypass the LINK_ROOT_URL.
+    // Repeat this until no more "../" substrings are found in newUrl.
+    for (let previousUrl = ``; previousUrl !== newUrl; ) {
+        previousUrl = newUrl;
+        newUrl = newUrl.replace(/\/[^/]+\/\.\.\//g, `/`);
+    }
+    return new Link(newUrl, linkElement.textContent);
+}
+module.exports = {
+    Link,
+    linkFromHTML,
+};
+</code></pre>

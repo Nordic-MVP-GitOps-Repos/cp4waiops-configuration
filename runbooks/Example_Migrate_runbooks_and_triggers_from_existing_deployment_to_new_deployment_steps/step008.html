@@ -1,0 +1,6 @@
+<p>Run the command</p>
+<section class="rba-command"><span class="rba-command-text">curl -X POST -k -s -u "<span class="rba-parameter" data-id="TARGET_APIKEY"></span>" -H "Expect:" -H "Content-Type: application/json"&nbsp;-d@./exportedRunbooks.json "https://<span class="rba-parameter" data-id="TARGET_RBAHOST"></span>/api/v1/rba/runbooks/import?publish=true" &gt; importedRunbooks.json</span></section>
+<ul>
+  <li>once for the single file exportedRunbooks.json (in case its size is below 1 MB)</li>
+  <li>or multiple times, once for each of the chunks exportedRunbooks.json.* that you have created in the previous step. In this case, you should also modify the name of "importedRunbooks.json" to a file name that corresponds to the name of the chunk, so each pair of export and import files can be compared later on.</li>
+</ul>

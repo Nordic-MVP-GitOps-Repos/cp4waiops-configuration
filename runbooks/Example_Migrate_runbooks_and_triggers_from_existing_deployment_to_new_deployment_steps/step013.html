@@ -1,0 +1,3 @@
+<p>Run the command (you need to adjust the filenames if you had to split exportedRunbooks.json):</p>
+<section class="rba-command"><span class="rba-command-text">node checkForMissingRunbooks.js exportedRunbooks.json importedRunbooks.json</span></section>
+<p>This command compares the lists of runbooks from both files. If importedRunbooks.json contains fewer runbooks than exportedRunbooks, then the command lists the runbooks that have not been imported to the target RBA deployment, and saves each of them to a file in subdirectory "./failedRunbookImports". Investigate for each of the missing runbooks why it could not be imported, and if needed, import or create the runbook individually before moving to the next step.</p>

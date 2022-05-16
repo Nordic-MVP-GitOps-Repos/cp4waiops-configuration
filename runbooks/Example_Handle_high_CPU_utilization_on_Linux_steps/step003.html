@@ -1,0 +1,8 @@
+<p>Run the following command:</p>
+<p>&nbsp;</p>
+<section class="rba-command"><span class="rba-command-text">top -b -n 1 | head -15</span></section>
+<p>&nbsp;</p>
+<p>Example output:</p>
+<p>(…)<br>PID&nbsp;&nbsp; USER&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; PR&nbsp; NI&nbsp;&nbsp;&nbsp; VIRT&nbsp;&nbsp;&nbsp; RES&nbsp;&nbsp;&nbsp; SHR S&nbsp; %CPU %MEM&nbsp;&nbsp;&nbsp;&nbsp; TIME+ COMMAND<br>17665 root&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 20&nbsp;&nbsp; 0&nbsp;&nbsp; 30672&nbsp;&nbsp; 1580&nbsp;&nbsp; 1140 R&nbsp; 82,3 11,8 &nbsp; 0:45.02 java<br>(…)</p>
+<p>The output shows a java process, that uses 82.3% of the CPU and has the PID 17665. If you find a process with a very high CPU utilization go back to your runbook parameters and change the PROCESSID parameter to the number identified - in our example, the value would be 17665.</p>
+<p>If there are no processes in this list with a significant CPU utilization, go to the end of this runbook:<span class="rba-goto" data-id="end"></span></p>

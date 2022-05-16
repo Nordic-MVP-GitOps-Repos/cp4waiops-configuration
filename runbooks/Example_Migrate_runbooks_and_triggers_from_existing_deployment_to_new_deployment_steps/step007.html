@@ -1,0 +1,4 @@
+<p>If the file exportedRunbooks.json is larger than 1 MB, then it cannot be imported in a single operation. Instead, it has to be split into multiple JSON files, and each of them has to be imported separately.</p>
+<p>If you have the "jq" tool installed, you can use the command</p>
+<section class="rba-command"><span class="rba-command-text">cat&nbsp;exportedRunbooks.json | jq .[] -c | split -l 100 --filter='jq . -cs &gt; $FILE' - exportedRunbooks.json.</span></section>
+<p>to split the file into chunks of 100 runbooks each, named exportedRunbooks.json.aa, exportedRunbooks.json.ab, etc. If the chunks are still too large (for example, if some of the runbooks contain images), then use a value that is lower than 100, and iterate this process until each chunk has a size of less than 1 MB.</p>

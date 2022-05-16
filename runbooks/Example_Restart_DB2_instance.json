@@ -1,0 +1,76 @@
+{
+  "name": "Example: Restart DB2 instance",
+  "description": "Restart a DB2 instance on Linux",
+  "steps": [
+    {
+      "title": "Disclaimer",
+      "number": 1,
+      "type": "manual",
+      "description": "Exported into step001.html"
+    },
+    {
+      "number": 2,
+      "description": "Exported into step002.html",
+      "title": "Login as DB2 instance owner",
+      "type": "manual"
+    },
+    {
+      "number": 3,
+      "description": "Exported into step003.html",
+      "title": "Determine whether DB2 is running",
+      "type": "manual"
+    },
+    {
+      "number": 4,
+      "description": "Exported into step004.html",
+      "title": "Stop the running DB2 instance",
+      "type": "manual"
+    },
+    {
+      "number": 5,
+      "description": "Exported into step005.html",
+      "title": "Check existence of sqllib folder",
+      "type": "manual"
+    },
+    {
+      "number": 6,
+      "description": "Exported into step006.html",
+      "title": "Perform an IPC cleanup",
+      "type": "manual"
+    },
+    {
+      "number": 7,
+      "description": "Exported into step007.html",
+      "title": "Start the DB2 instance",
+      "type": "manual"
+    },
+    {
+      "number": 8,
+      "description": "Exported into step008.html",
+      "title": "Determine whether DB2 is running",
+      "type": "manual"
+    }
+  ],
+  "parameters": [
+    {
+      "name": "HOSTNAME",
+      "description": "Hostname where DB2 is running",
+      "type": "string",
+      "minLength": 1
+    },
+    {
+      "name": "DB2INSTANCE",
+      "description": "DB2 instance name",
+      "type": "string",
+      "minLength": 1
+    }
+  ],
+  "tags": [
+    "linux",
+    "database",
+    "db2",
+    "sample"
+  ],
+  "_runbookId": "ba6f08dc-b221-4526-9fe3-90653ac12fac",
+  "automations": {}
+}
