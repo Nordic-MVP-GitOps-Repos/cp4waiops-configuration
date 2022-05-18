@@ -1,5 +1,5 @@
 {
-  "name": "Call the catfacts to remedy problem",
+  "name": "Call the catfacts API to remedy problem",
   "description": "Create a new issue in a GitHub repository using the template defined in the automation. This runbook in combination with its referenced automation action (see step 1) can also be used as an example how to create a fully automated runbook in general.",
   "steps": [
     {
